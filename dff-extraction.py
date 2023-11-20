@@ -88,7 +88,9 @@ for filename in tif_files:
 
 # %%
 
-#TEST (coordinates xyz vs zyx) does not work pixel empty
+#TEST (coordinates xyz vs zyx) does not work pixel empty 
+
+THAT SHOULD BE COMMITTED
 
 # Iterate through each TIFF file in the folder
 for filename in tif_files:
