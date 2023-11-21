@@ -7,7 +7,7 @@ import pandas as pd
 from scipy.spatial.distance import cdist
 
 #%%
-
+'''
 # Load one TIFF stack to check dimension
 tiff_stack = tf.imread('/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack/t_1001.tiff')
 
@@ -20,12 +20,12 @@ print("Number of images in stack:", tiff_stack.shape[0])  # Assuming 1st dimensi
 print("Image size (height x width):", tiff_stack.shape[1], "x", tiff_stack.shape[2])
 
 "tiff_stack.shape[0] = z, tiff_stack.shape[1] = y, and tiff_stack.shape[2]) = x"
-
+'''
 # %%
 
 # Get tif files
 # Path to the folder containing the 3D images
-folder_path = '/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack'
+folder_path = '/Volumes/zfs/data_WillBishop/t_0-1000'
 
 # Get a list of TIFF files in the folder
 tif_files = [f for f in os.listdir(folder_path) if f.endswith('.tiff')]
@@ -60,7 +60,10 @@ coordinates_data['LM_z'] = (coordinates_data['LM_z'] / px_depth).astype(int)
 # %%
 # Iterate through each tiff stack, extract average pixel value and save as csv
 
-folder_path = '/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack'  # Replace with your folder path
+# This does not run for data from server!! I guess it timed out when calculating radius
+
+folder_path = '/Volumes/zfs/data_WillBishop/t_0-1000'  # Replace with your folder path
+#folder_path = '/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack'  # Replace with your folder path
 tiff_files = [f for f in os.listdir(folder_path) if f.endswith('.tif') or f.endswith('.tiff')]
 
 # Dictionary to store average pixel values for each coordinate
@@ -126,7 +129,7 @@ for filename in tiff_files:
 # Convert dictionary to DataFrame and save as CSV
 df = pd.DataFrame(average_values)
 df.rename(columns=coordinate_to_name, inplace=True)  # Rename columns using the dictionary
-df.to_csv('/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack/average_pixel_values_with_names.csv', index=False)
+df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/average_pixel_values_TP_0-1000.csv', index=False)
 
 # %%
 
