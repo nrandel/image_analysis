@@ -115,8 +115,19 @@ for filename in tiff_files:
             average_values[coordinate_key] = []
         average_values[coordinate_key].append(average_intensity)
 
+        # Create a dictionary to map coordinates to names
+        coordinate_to_name = {}
+
+        for index, row in coordinates_data.iterrows():
+            name = row["skid-left"]
+            x, y, z = row['LM_x'], row['LM_y'], row['LM_z']
+            coordinate_to_name[f"Coordinate_{x}_{y}_{z}"] = name
+
 # Convert dictionary to DataFrame and save as CSV
 df = pd.DataFrame(average_values)
-df.to_csv('/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack/average_pixel_values.csv', index=False)
+df.rename(columns=coordinate_to_name, inplace=True)  # Rename columns using the dictionary
+df.to_csv('/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack/average_pixel_values_with_names.csv', index=False)
+
+# %%
 
 # %%
