@@ -58,10 +58,13 @@ coordinates_data['LM_z'] = (coordinates_data['LM_z'] / px_depth).astype(int)
 #print(coordinates_data["LM_z"])
 
 # %%
-# Iterate through each tiff stack
+# Iterate through each tiff stack, extract average pixel value and save as csv
 
 folder_path = '/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack'  # Replace with your folder path
 tiff_files = [f for f in os.listdir(folder_path) if f.endswith('.tif') or f.endswith('.tiff')]
+
+# Dictionary to store average pixel values for each coordinate
+average_values = {}
 
 for filename in tiff_files:
     file_path = os.path.join(folder_path, filename)
@@ -85,9 +88,6 @@ for filename in tiff_files:
         sphere_mask_z = (zz - z) ** 2 <= radius_z ** 2
 
         # Combine masks for x, y, and z axes
-        #sphere_mask = sphere_mask_x & sphere_mask_y & sphere_mask_z
-
-        # Combine masks for x, y, and z axes
         sphere_mask = sphere_mask_x & sphere_mask_y & sphere_mask_z
 
         # Transpose sphere_mask dimensions to match the image stack's shape
@@ -104,7 +104,19 @@ for filename in tiff_files:
         # Calculate average pixel intensity within the sphere
         average_intensity = np.mean(pixels_in_sphere)
 
-        print(f"Average intensity for coordinates ({x}, {y}, {z}) "
-              f"in image {filename}: {average_intensity}")
+        #print(f"Average intensity for coordinates ({x}, {y}, {z}) "
+        #      f"in image {filename}: {average_intensity}")
+
+        # Create a key to store average values for each coordinate
+        coordinate_key = f"Coordinate_{x}_{y}_{z}"
+        
+        # Add average intensity to the dictionary
+        if coordinate_key not in average_values:
+            average_values[coordinate_key] = []
+        average_values[coordinate_key].append(average_intensity)
+
+# Convert dictionary to DataFrame and save as CSV
+df = pd.DataFrame(average_values)
+df.to_csv('/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack/average_pixel_values.csv', index=False)
 
 # %%
