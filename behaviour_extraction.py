@@ -142,7 +142,7 @@ filtered_behavioural_data_single_event = behavioural_data[behavioural_data['beh'
 # Show the filtered data
 #print(filtered_behavioural_data_single_event)
 '''
-#here old code ends
+#here old code ends. make sure you reference to the correct filter. here as test I have single event, but the code needs to be cleaned up
 '''
 # Extract start time points of filtered events
 start_time_points = filtered_behavioural_data_single_event['start'].tolist()
