@@ -45,21 +45,7 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# TEST for mean value 
-
-
-
-
-
-
-
-
-
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Read the CSV file into a DataFrame
-final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/final_output.csv')
+# Plot mean value onnly, per event over time points for selected neurons 
 
 # Group by Event_Number and reset time point for each event
 event_time_range_max = final_output.groupby('Event_Number')['Time_Point'].max() - 1
@@ -99,13 +85,7 @@ plt.show()
 
 
 # %%
-
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Read the CSV file into a DataFrame
-final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/final_output.csv')
-
+# Plot values per event over time points for selected neurons, AND mean
 
 # Group by Event_Number and reset time point for each event
 event_time_range_max = final_output.groupby('Event_Number')['Time_Point'].max() - 1
