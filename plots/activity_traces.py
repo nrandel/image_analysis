@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 
 # %%
 # Read the CSV file into a DataFrame
-df = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack/average_pixel_values_with_names.csv')
+df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/average_pixel_values_with_names_5.csv')
 
 # %%
 # Specify multiple column names you want to plot
-columns_to_plot = ['89409', '68884', '48991']  # Replace with desired column names
+columns_to_plot = ['89409']  # Replace with desired column names, e.g., ['89409', '68884', '48991']
 
 # Plot the selected columns based on their header names
 for column in columns_to_plot:
