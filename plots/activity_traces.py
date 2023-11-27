@@ -93,7 +93,7 @@ event_time_range_min = final_output.groupby('Event_Number')['Time_Point'].min() 
 event_time_range = event_time_range_max - event_time_range_min
 
 # Define the neurons you want to include in the plot
-neurons_to_plot = [89409]  # Replace with the specific neuron IDs you want to include, e.g., [89409, 48991]
+neurons_to_plot = [23967]  # Replace with the specific neuron IDs you want to include, e.g., [89409, 48991]
 
 # Dictionary to store values for each time point
 time_point_values = {}
