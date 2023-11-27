@@ -7,7 +7,7 @@ import pandas as pd
 from scipy.spatial.distance import cdist
 
 #%%
-'''
+
 # Load one TIFF stack to check dimension
 tiff_stack = tf.imread('/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack/t_1001.tiff')
 
@@ -19,16 +19,20 @@ print("Data type:", tiff_stack.dtype)
 print("Number of images in stack:", tiff_stack.shape[0])  # Assuming 1st dimension represents the number of images
 print("Image size (height x width):", tiff_stack.shape[1], "x", tiff_stack.shape[2])
 
-"tiff_stack.shape[0] = z, tiff_stack.shape[1] = y, and tiff_stack.shape[2]) = x"
-'''
+#tiff_stack.shape[0] = z, tiff_stack.shape[1] = y, and tiff_stack.shape[2]) = x
+
 # %%
 # get a sphere at defined coordinate in 4D image stack and read out average pixel value (df/f in sphere over time)
 # Get tif files
 # Path to the folder containing the 3D images
-folder_path = '/Volumes/zfs/data_WillBishop/t_0-1000'
+# folder_path = '/Volumes/zfs/data_WillBishop/t_0-1000'
 
-# Get a list of TIFF files in the folder
-tif_files = [f for f in os.listdir(folder_path) if f.endswith('.tiff')]
+#TEST 
+folder_path = '/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack'
+
+# Get a list of TIFF files in the folder, and tiff files in numerical order
+tiff_files = sorted([f for f in os.listdir(folder_path) if f.endswith('.tif') or f.endswith('.tiff')], key=lambda x: int(x.split('_')[1].split('.')[0]))
+
 
 # %%
 # Load the CSV file containing coordinates (in nm)
@@ -60,10 +64,8 @@ coordinates_data['LM_z'] = (coordinates_data['LM_z'] / px_depth).astype(int)
 # %%
 # Iterate through each tiff stack, extract average pixel value and save as csv
 
-# This does not run for data from server!! I guess it timed out when calculating radius
-
-folder_path = '/Volumes/zfs/data_WillBishop/t_0-1000'  # Replace with your folder path
-#folder_path = '/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack'  # Replace with your folder path
+#folder_path = '/Volumes/zfs/data_WillBishop/t_0-1000'  # Replace with your folder path
+folder_path = '/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack'  # Replace with your folder path
 tiff_files = [f for f in os.listdir(folder_path) if f.endswith('.tif') or f.endswith('.tiff')]
 
 # Dictionary to store average pixel values for each coordinate
