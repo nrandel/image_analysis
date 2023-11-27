@@ -17,18 +17,23 @@ print(list(merged_activity_traces.columns))
 
 # %%
 # Select columns
-selected_columns = ["89409", "68884"]
+selected_columns = ["50663"] # e.g., ["89409", "68884"]
 
 # %%
-# Plot the selected columns
+# Define the range of rows to plot
+start_row = 100
+end_row = 1500
+
+# %%
+# Plot the selected columns for the specified rows
 for column in selected_columns:
     if column in merged_activity_traces.columns:
-        plt.plot(merged_activity_traces.index, merged_activity_traces[column], label=column)
+        plt.plot(merged_activity_traces.index[start_row:end_row], merged_activity_traces[column].iloc[start_row:end_row], label=column)
 
 # Add labels and legend
 plt.xlabel('X-axis label')
 plt.ylabel('Y-axis label')
-plt.title('Plotting selected columns')
+plt.title('Plotting selected columns (Rows {} to {})'.format(start_row, end_row))
 plt.legend()
 plt.show()
 
