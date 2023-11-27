@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 
 # %%
 # Read the CSV file into a DataFrame
-final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/final_output.csv')
+final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-11-24/final_output.csv')
 
 # %%
 
-# Group by Event_Number and reset time point for each event
-event_time_range_max = final_output.groupby('Event_Number')['Time_Point'].max() -1
-event_time_range_min = final_output.groupby('Event_Number')['Time_Point'].min() -1
+# Group by Event_Number and reset time point for each event to identify number of time points (works with positive TP)
+event_time_range_max = final_output.groupby('Event_Number')['Time_Point'].max() 
+event_time_range_min = final_output.groupby('Event_Number')['Time_Point'].min() 
 
 event_time_range = event_time_range_max - event_time_range_min
 
