@@ -22,7 +22,7 @@ print("Image size (height x width):", tiff_stack.shape[1], "x", tiff_stack.shape
 "tiff_stack.shape[0] = z, tiff_stack.shape[1] = y, and tiff_stack.shape[2]) = x"
 '''
 # %%
-
+# get a sphere at defined coordinate in 4D image stack and read out average pixel value (df/f in sphere over time)
 # Get tif files
 # Path to the folder containing the 3D images
 folder_path = '/Volumes/zfs/data_WillBishop/t_0-1000'

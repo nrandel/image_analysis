@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-11-24/Decision_beh-after_-20TP/final_output_TL-TR--Decision-20TP.csv') #multiple event-type
 
 # %%
-
 # Group by Event_Number and reset time point for each event to identify number of time points 
 event_time_range_max = final_output.groupby('Event_Number')['Time_Point'].max() 
 event_time_range_min = final_output.groupby('Event_Number')['Time_Point'].min() 
