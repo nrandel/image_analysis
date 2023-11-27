@@ -39,5 +39,3 @@ for file in sorted_csv_files:
 
 # Output the merged data to a single CSV file
 merged_data.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/merged_activity_traces.csv', index=False)
-
-# %%
