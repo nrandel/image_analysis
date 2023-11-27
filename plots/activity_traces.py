@@ -68,7 +68,7 @@ for neuron_id in neurons_to_plot:
             continue  # Skip plotting this event
         
         # Plot individual traces
-        plt.plot(time_points, values, alpha=0.5, label=f'Neuron {neuron_id}, Event {event_label}')
+        plt.plot(time_points, values, alpha=0.5, label=f'Neuron {neuron_id}, Event {event_label}', color = 'k')
         
         # Store values for averaging
         all_values.append(values)
