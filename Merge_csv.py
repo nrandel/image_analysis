@@ -2,12 +2,14 @@
 # Import libraries
 import numpy as np
 import pandas as pd
+import os
+import re
 
 # %%
 
 # Generate merged csv of activity traces
 # Path to the directory containing your CSV files
-directory_path = '/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces'
+directory_path = '/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-11-24'
 
 # List all CSV files in the directory
 csv_files = [file for file in os.listdir(directory_path) if file.endswith('.csv')]
@@ -39,3 +41,5 @@ for file in sorted_csv_files:
 
 # Output the merged data to a single CSV file
 merged_data.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/merged_activity_traces.csv', index=False)
+
+# %%

@@ -11,5 +11,25 @@ import matplotlib.pyplot as plt
 merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-11-24/merged_activity_traces.csv')
 
 # %%
-# Plot multiple cells 
+# Display available columns
+print("Available columns:")
+print(list(merged_activity_traces.columns))
 
+# %%
+# Select columns
+selected_columns = ["89409", "68884"]
+
+# %%
+# Plot the selected columns
+for column in selected_columns:
+    if column in merged_activity_traces.columns:
+        plt.plot(merged_activity_traces.index, merged_activity_traces[column], label=column)
+
+# Add labels and legend
+plt.xlabel('X-axis label')
+plt.ylabel('Y-axis label')
+plt.title('Plotting selected columns')
+plt.legend()
+plt.show()
+
+# %%
