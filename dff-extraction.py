@@ -7,7 +7,7 @@ import pandas as pd
 from scipy.spatial.distance import cdist
 
 #%%
-
+'''
 # Load one TIFF stack to check dimension
 tiff_stack = tf.imread('/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack/t_1001.tiff')
 
@@ -20,7 +20,7 @@ print("Number of images in stack:", tiff_stack.shape[0])  # Assuming 1st dimensi
 print("Image size (height x width):", tiff_stack.shape[1], "x", tiff_stack.shape[2])
 
 #tiff_stack.shape[0] = z, tiff_stack.shape[1] = y, and tiff_stack.shape[2]) = x
-
+'''
 # %%
 # get a sphere at defined coordinate in 4D image stack and read out average pixel value (df/f in sphere over time)
 # Get tif files
@@ -28,9 +28,9 @@ print("Image size (height x width):", tiff_stack.shape[1], "x", tiff_stack.shape
 # folder_path = '/Volumes/zfs/data_WillBishop/t_0-1000'
 
 #TEST 
-folder_path = '/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack'
+folder_path = '/Users/nadine/Desktop/dff_test_artifact'
 
-# Get a list of TIFF files in the folder, and tiff files in numerical order
+# Get a list of TIFF files in the folder, and tiff files sorted in numerical order
 tiff_files = sorted([f for f in os.listdir(folder_path) if f.endswith('.tif') or f.endswith('.tiff')], key=lambda x: int(x.split('_')[1].split('.')[0]))
 
 
@@ -66,7 +66,7 @@ coordinates_data['LM_z'] = (coordinates_data['LM_z'] / px_depth).astype(int)
 
 #folder_path = '/Volumes/zfs/data_WillBishop/t_0-1000'  # Replace with your folder path
 folder_path = '/Users/nadine/Documents/Zlatic_lab/manual_registration_1099/dff_WB/test_made-up_stack'  # Replace with your folder path
-tiff_files = [f for f in os.listdir(folder_path) if f.endswith('.tif') or f.endswith('.tiff')]
+tiff_files = sorted([f for f in os.listdir(folder_path) if f.endswith('.tif') or f.endswith('.tiff')], key=lambda x: int(x.split('_')[1].split('.')[0]))
 
 # Dictionary to store average pixel values for each coordinate
 average_values = {}
