@@ -11,8 +11,11 @@ final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated
 
 # %%
 # Group by Event_Number and reset time point for each event to identify number of time points 
-event_time_range_max = final_output.groupby('Event_Number')['Time_Point'].max() 
-event_time_range_min = final_output.groupby('Event_Number')['Time_Point'].min() 
+
+#event_time_range_max = final_output.groupby('Event_Number')['Time_Point'].max() - 1 the tiff stack starts at o, the behaviour at 1!!
+
+event_time_range_max = final_output.groupby('Event_Number')['Time_Point'].max() -1
+event_time_range_min = final_output.groupby('Event_Number')['Time_Point'].min() -1
 
 event_time_range = event_time_range_max - event_time_range_min
 

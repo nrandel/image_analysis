@@ -17,12 +17,12 @@ print(list(merged_activity_traces.columns))
 
 # %%
 # Select columns
-selected_columns = ["50663"] # e.g., ["89409", "68884"]
+selected_columns = ["24006"] # e.g., ["89409", "68884"]
 
 # %%
 # Define the range of rows to plot
-start_row = 100
-end_row = 1500
+start_row = 500
+end_row = 2500
 
 # %%
 # Plot the selected columns for the specified rows
