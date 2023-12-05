@@ -28,7 +28,7 @@ print(filtered_behavioural_data_and)
 
 # %%
 # Read csvfile of merged activity traces
-merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-11-24/merged_activity_traces.csv')
+merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/out_3-3-1.csv')
 
 # %%
 # Extract start time points of filtered events
@@ -36,6 +36,7 @@ start_time_points = filtered_behavioural_data_and['start'].tolist()
 print(start_time_points)
 
 # Define a range of specific time points to add/subtract
+'''Either positive OR negative values'''
 time_range = -20  # For example, a range of 5 time points, includinng the start-point
 
 # Create a list of tuples containing event label and time point range
@@ -52,13 +53,19 @@ for event_num, start in enumerate(start_time_points, start=1):
 event_time_ranges_df = pd.DataFrame(event_time_ranges, columns=['Event_Label', 'Time_Points_Range'])
 
 # Export the DataFrame to a CSV file
-event_time_ranges_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-11-24/Decision_beh-after_-20TP/TL-TR-Decision-20TP.csv', index=False)
+event_time_ranges_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/TL-TR_radius-3-3-1-20TP.csv', index=False)
+
 # %%
 # Extract the data from the 'merged_activity_traces' CSV corresponding to the time points specified in the 'event_time_ranges_df' CSV. 
 
 # Read the CSV files, specifying the 'Time_Points_Range' column to be converted using ast.literal_eval
-merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-11-24/merged_activity_traces.csv')
-event_time_ranges_df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-11-24/Decision_beh-after_-20TP/TL-TR-Decision-20TP.csv', converters={'Time_Points_Range': ast.literal_eval})
+merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/out_3-3-1.csv')
+
+event_time_ranges_df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/TL-TR_radius-3-3-1-20TP.csv', converters={'Time_Points_Range': ast.literal_eval})
+#event_time_ranges_df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/TL-TR_radius-3-3-1-10_5TP.csv', converters={'Time_Points_Range': ast.literal_eval})
+
+# Remove the 'timepoint' column
+merged_activity_traces.drop('timepoint', axis=1, inplace=True)  # axis=1 specifies column-wise operation
 
 # Iterate through each row in event_time_ranges_df to extract data
 final_output = []
@@ -84,19 +91,49 @@ for _, row in event_time_ranges_df.iterrows():
 result_df = pd.concat(final_output, ignore_index=True)
 
 # Save the result to a new CSV file
-result_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-11-24/Decision_beh-after_-20TP/final_output_TL-TR--Decision-20TP.csv', index=False)
+result_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_TL-TR_radius-3-3-1-20TP.csv', index=False)
+#result_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_TL-TR_radius-3-3-1-10_5TP.csv', index=False)
 
 # %%
-"""
-# Define multiple events for 'OR' condition
-desired_events_or = ['F', 'TL']  # Example events
 
-# Define columns to keep
-columns_to_keep = ["start", "end", "beh"]
 
-# Filter rows where 'beh' column matches at least one desired event (OR condition)
-filtered_behavioural_data_or = behavioural_data[behavioural_data['beh'].isin(desired_events_or)][columns_to_keep]
 
-# Show the filtered data
-print(filtered_behavioural_data_or)
-"""
+
+
+
+#TEST  timerange negative and positive value
+# Extract start time points of filtered events 
+
+start_time_points = filtered_behavioural_data_and['start'].tolist()
+print(start_time_points)
+
+# Define a range of specific time points to add/subtract
+'''Range of positive AND negative values'''
+negative_range = range(-10, 0)  # range(-10, 0) Range from -10 to -1
+positive_range = range(0, 6)    # range(0, 6) Range from 0 to 5
+
+# Merge the ranges into a single list
+time_points_range = list(negative_range) + list(positive_range)
+print(time_points_range)
+
+# Create a list of tuples containing event label and time point range
+event_time_ranges = []
+for event_num, start in enumerate(start_time_points, start=1):
+    event_label = f"{desired_events_and}_{event_num}"
+    # Generate the time points range by adding the start point to each value in the range
+    event_time_ranges.append((event_label, [start + i for i in time_points_range]))
+
+# If you want to print the event_time_ranges
+print(event_time_ranges)
+
+# Convert the list of tuples to a DataFrame
+event_time_ranges_df = pd.DataFrame(event_time_ranges, columns=['Event_Label', 'Time_Points_Range'])
+
+# Export the DataFrame to a CSV file
+''' Add timerange to file name '''
+event_time_ranges_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/TL-TR_radius-3-3-1-10_5TP.csv', index=False)
+
+
+
+
+# %%
