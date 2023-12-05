@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 # %%
 # Read the CSV file into a DataFrame
 # Forward
-#final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-11-24/Decision_beh-after_-20TP/final_output_F-Decision-20TP.csv') #single event-type
+final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_F-Decision-10_5TP.csv') #single event-type
 # TL, TR
-final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-11-24/Decision_beh-after_-20TP/final_output_TL-TR--Decision-20TP.csv') #multiple event-type
+#final_output = pd.read_csv('path') #multiple event-type
 
 # %%
 # Group by Event_Number and reset time point for each event to identify number of time points 
@@ -21,7 +21,7 @@ event_time_range = event_time_range_max - event_time_range_min
 
 # %%
 # Define the neurons you want to include in the plot
-neurons_to_plot = [56311, 50663]  # Replace with the specific neuron IDs you want to include, e.g., [56311, 50663]
+neurons_to_plot = [73673]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
 
 # %%
 # Plot values per event over time points for selected neurons
@@ -33,7 +33,7 @@ for neuron_id in neurons_to_plot:
         time_point_range = event_time_range.loc[event_label] + 1  # Fetch time point range for the event (+1 for inclusive range)
         time_points = range(time_point_range)  # Create range based on the time point range
         values = event_data[event_data['Event_Number'] == event_label]['Value'].values[:time_point_range]  # Select values corresponding to the time point range
-        
+
         if len(values) != time_point_range:
             print(f"Event {event_label} has mismatched lengths! Expected: {time_point_range}, Actual: {len(values)}")
             continue  # Skip plotting this event
@@ -51,6 +51,12 @@ plt.tight_layout()
 plt.show()
 
 # %%
+
+
+
+
+
+
 # Plot values per event over time points for selected neurons, and average, either for each neuronID separately, or combined
 
 plt.figure(figsize=(10, 6))  # Adjust figure size if needed
