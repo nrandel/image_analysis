@@ -5,13 +5,15 @@ import matplotlib.pyplot as plt
 # %%
 # Read the CSV file into a DataFrame
 # Forward
-final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_F-Decision-10_5TP.csv') #single event-type
-# TL, TR
-#final_output = pd.read_csv('path') #multiple event-type
+#final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_F-Decision-10_5TP.csv') #single event-type
+
+# TL, TR (ONLY NEGATIVE VALUE)
+# final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_TL-TR_radius-3-3-1-20TP.csv') #multiple event-type
+# TL, TR (NEGATIVE TO POSITIVE TIME RANGE)
+final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_TL-TR_radius-3-3-1-10_5TP.csv') #multiple event-type
 
 # %%
 # Group by Event_Number and reset time point for each event to identify number of time points 
-
 #event_time_range_max = final_output.groupby('Event_Number')['Time_Point'].max() - 1 the tiff stack starts at o, the behaviour at 1!!
 
 event_time_range_max = final_output.groupby('Event_Number')['Time_Point'].max() -1
@@ -51,12 +53,6 @@ plt.tight_layout()
 plt.show()
 
 # %%
-
-
-
-
-
-
 # Plot values per event over time points for selected neurons, and average, either for each neuronID separately, or combined
 
 plt.figure(figsize=(10, 6))  # Adjust figure size if needed
