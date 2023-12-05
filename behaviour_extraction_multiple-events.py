@@ -53,7 +53,38 @@ for event_num, start in enumerate(start_time_points, start=1):
 event_time_ranges_df = pd.DataFrame(event_time_ranges, columns=['Event_Label', 'Time_Points_Range'])
 
 # Export the DataFrame to a CSV file
+''' Add timerange to file name '''
 event_time_ranges_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/TL-TR_radius-3-3-1-20TP.csv', index=False)
+
+# %%
+start_time_points = filtered_behavioural_data_and['start'].tolist()
+print(start_time_points)
+
+# Define a range of specific time points to add/subtract
+'''Range of positive AND negative values'''
+negative_range = range(-10, 0)  # range(-10, 0) Range from -10 to -1
+positive_range = range(0, 6)    # range(0, 6) Range from 0 to 5
+
+# Merge the ranges into a single list
+time_points_range = list(negative_range) + list(positive_range)
+print(time_points_range)
+
+# Create a list of tuples containing event label and time point range
+event_time_ranges = []
+for event_num, start in enumerate(start_time_points, start=1):
+    event_label = f"{desired_events_and}_{event_num}"
+    # Generate the time points range by adding the start point to each value in the range
+    event_time_ranges.append((event_label, [start + i for i in time_points_range]))
+
+# If you want to print the event_time_ranges
+print(event_time_ranges)
+
+# Convert the list of tuples to a DataFrame
+event_time_ranges_df = pd.DataFrame(event_time_ranges, columns=['Event_Label', 'Time_Points_Range'])
+
+# Export the DataFrame to a CSV file
+''' Add timerange to file name '''
+event_time_ranges_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/TL-TR_radius-3-3-1-10_5TP.csv', index=False)
 
 # %%
 # Extract the data from the 'merged_activity_traces' CSV corresponding to the time points specified in the 'event_time_ranges_df' CSV. 
@@ -93,47 +124,5 @@ result_df = pd.concat(final_output, ignore_index=True)
 # Save the result to a new CSV file
 result_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_TL-TR_radius-3-3-1-20TP.csv', index=False)
 #result_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_TL-TR_radius-3-3-1-10_5TP.csv', index=False)
-
-# %%
-
-
-
-
-
-
-#TEST  timerange negative and positive value
-# Extract start time points of filtered events 
-
-start_time_points = filtered_behavioural_data_and['start'].tolist()
-print(start_time_points)
-
-# Define a range of specific time points to add/subtract
-'''Range of positive AND negative values'''
-negative_range = range(-10, 0)  # range(-10, 0) Range from -10 to -1
-positive_range = range(0, 6)    # range(0, 6) Range from 0 to 5
-
-# Merge the ranges into a single list
-time_points_range = list(negative_range) + list(positive_range)
-print(time_points_range)
-
-# Create a list of tuples containing event label and time point range
-event_time_ranges = []
-for event_num, start in enumerate(start_time_points, start=1):
-    event_label = f"{desired_events_and}_{event_num}"
-    # Generate the time points range by adding the start point to each value in the range
-    event_time_ranges.append((event_label, [start + i for i in time_points_range]))
-
-# If you want to print the event_time_ranges
-print(event_time_ranges)
-
-# Convert the list of tuples to a DataFrame
-event_time_ranges_df = pd.DataFrame(event_time_ranges, columns=['Event_Label', 'Time_Points_Range'])
-
-# Export the DataFrame to a CSV file
-''' Add timerange to file name '''
-event_time_ranges_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/TL-TR_radius-3-3-1-10_5TP.csv', index=False)
-
-
-
 
 # %%
