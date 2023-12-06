@@ -4,13 +4,14 @@ import matplotlib.pyplot as plt
 
 # %%
 # Read the CSV file into a DataFrame
+'''TODO MAke directory with all behaviour-extraction to create those fial outputs'''
 # Forward
-#final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_F-Decision-10_5TP.csv') #single event-type
+final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_F-Decision-10TP.csv') #single event-type
 
 # TL, TR (ONLY NEGATIVE VALUE)
 # final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_TL-TR_radius-3-3-1-20TP.csv') #multiple event-type
 # TL, TR (NEGATIVE TO POSITIVE TIME RANGE)
-final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_TL-TR_radius-3-3-1-10_5TP.csv') #multiple event-type
+#final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action-selection/final_output_TL-TR_radius-3-3-1-10_5TP.csv') #multiple event-type
 
 # %%
 # Group by Event_Number and reset time point for each event to identify number of time points 

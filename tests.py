@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 #%%
 # Read csvfile of merged activity traces
-merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/out_3-3-1.csv')
+merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_2-2-1/traces_2-2-1.csv')
 
 # %%
 # Display available columns
@@ -21,8 +21,8 @@ selected_columns = ["68884"] # e.g., ["89409", "68884"]
 
 # %%
 # Define the range of rows to plot
-start_row = 1
-end_row = 2000
+start_row = 500
+end_row = 1500
 
 
 # %%
