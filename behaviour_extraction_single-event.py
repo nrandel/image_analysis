@@ -15,7 +15,7 @@ columns = ["start", "end", "beh", "subject-id", "beh_before", "beh_before_start"
 
 # %%
 # Define single event type you want to extract
-desired_event = 'TR'
+desired_event = 'F'
 
 # Define columns to keep
 columns_to_keep = ["start", "end", "beh"]
@@ -88,18 +88,22 @@ event_time_ranges_df = pd.DataFrame(event_time_ranges, columns=['Event_Label', '
 
 # Export the DataFrame to a CSV file
 ''' Add timerange to file name '''
-event_time_ranges_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/alliged_behaviour/TR-Decision-60_15TP.csv', index=False)
+event_time_ranges_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/alliged_behaviour/F-Decision-60_15TP.csv', index=False)
 
 
 # %%
 # Extract the data from the 'merged_activity_traces' CSV corresponding to the time points specified in the 'event_time_ranges_df' CSV. 
 
 # Read the CSV files, specifying the 'Time_Points_Range' column to be converted using ast.literal_eval
-merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/out_3-3-1.csv')
-event_time_ranges_df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/alliged_behaviour/TR-Decision-60_15TP.csv', converters={'Time_Points_Range': ast.literal_eval})
+merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/traces_3-3-1.csv')
+event_time_ranges_df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/alliged_behaviour/F-Decision-60_15TP.csv', converters={'Time_Points_Range': ast.literal_eval})
+
+# Truncated event_time_range
+# event_time_ranges_df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/alliged_behaviour/truncated/F-Decision-60_15TP_truncated.csv', converters={'Time_Points_Range': ast.literal_eval})
+
 
 # Remove the 'timepoint' column. In same csv its 'time'
-merged_activity_traces.drop('timepoint', axis=1, inplace=True)  # axis=1 specifies column-wise operation
+merged_activity_traces.drop('time', axis=1, inplace=True)  # axis=1 specifies column-wise operation
 
 # Iterate through each row in event_time_ranges_df to extract data
 final_output = []
@@ -125,6 +129,6 @@ for _, row in event_time_ranges_df.iterrows():
 result_df = pd.concat(final_output, ignore_index=True)
 
 # Save the result to a new CSV file
-result_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action_selection/final_output_TR-Decision-60_15TP.csv', index=False)
+result_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action_selection/final_output_F-Decision-60_15TP.csv', index=False)
 
 # %%
