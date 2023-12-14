@@ -1,6 +1,7 @@
 # %%
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.signal import savgol_filter
 
 # %%
 # Read the CSV file into a DataFrame
@@ -24,7 +25,7 @@ event_time_range = event_time_range_max - event_time_range_min
 
 # %%
 # Define the neurons you want to include in the plot
-neurons_to_plot = [73673]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
+neurons_to_plot = [26236, 57617]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
 
 
 # %%
@@ -117,13 +118,12 @@ for neuron_id in neurons_to_plot:
             print(f"Event {event_label} has mismatched lengths! Expected: {time_point_range}, Actual: {len(values)}")
             continue  # Skip plotting this event
  
-        smoothed_values = savgol_filter(values, window_length=5, polyorder=2)  # Adjust window length and polynomial order as needed
-        plt.plot(time_points, smoothed_values, label=f'Smoothed Event {event_label}')
+        smoothed_values = savgol_filter(values, window_length=7, polyorder=3)  # Adjust window length and polynomial order as needed (e.g., window length 5)
+        #plt.plot(time_points, smoothed_values, label=f'Smoothed Event {event_label}')
 
         # Calculating the derivative using the Savitzky-Golay filter
-        derivative = savgol_filter(values, window_length=5, polyorder=2, deriv=1)  # Adjust parameters as needed
-
-        #plt.plot(time_points, derivative, label=f'Derivative Event {event_label}')  # Plot derivative
+        derivative = savgol_filter(values, window_length=7, polyorder=3, deriv=1)  # Adjust parameters as needed (e.g., window_length=5, polyorder=2, deriv=2)
+        plt.plot(time_points, derivative, label=f'Derivative Event {event_label}')  # Plot derivative
 
     plt.xlabel(f'Time (Reset for Each Event, Range: 0-{time_point_range - 1})')
     plt.ylabel(f'Neuron {neuron_id} Value')
