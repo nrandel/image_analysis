@@ -6,7 +6,7 @@ from scipy.signal import savgol_filter
 # %%
 # Read the CSV file into a DataFrame
 # Single behaviour
-final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action_selection/final_output_F-Decision-60_15TP.csv') #single event-type
+final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_F-Decision-60_15TP.csv') #single event-type
 
 # truncated single behaviour
 #final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action_selection/final_output_Tl-TR-Decision-60_15TP_Event_1-15.csv') #single event-type
@@ -25,7 +25,7 @@ event_time_range = event_time_range_max - event_time_range_min
 
 # %%
 # Define the neurons you want to include in the plot
-neurons_to_plot = [26236, 57617]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
+neurons_to_plot = [62188, 58054]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
 
 
 # %%
@@ -33,7 +33,7 @@ neurons_to_plot = [26236, 57617]  # Replace with the specific neuron IDs you wan
 
 plt.figure(figsize=(10, 6))  # Adjust figure size if needed
 for neuron_id in neurons_to_plot:
-    plt.subplot(len(neurons_to_plot), 1, neurons_to_plot.index(neuron_id) + 1) # select if individual plots for each neuron
+    #plt.subplot(len(neurons_to_plot), 1, neurons_to_plot.index(neuron_id) + 1) # select if individual plots for each neuron
     for event_label, event_data in final_output[final_output['Neuron'] == neuron_id].groupby('Event_Number'):
         time_point_range = event_time_range.loc[event_label] + 1  # Fetch time point range for the event (+1 for inclusive range)
         time_points = range(time_point_range)  # Create range based on the time point range
