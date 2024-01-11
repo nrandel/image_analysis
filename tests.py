@@ -17,12 +17,12 @@ print(list(merged_activity_traces.columns))
 
 # %%
 # Select columns
-selected_columns = ['24958'] # e.g., ["89409", "68884"]
+selected_columns = ['73673', '89409', '68884', '48991', '50620', '61198', '56311', '50663', '24746', '23967', '85110', '24958', '24006', '45819', '36672', '9233', '23971', '35672', '66113', '33923', '25217', '26236', '57617', '48584', '56730', '32240', '50631', '71849', '24010', '69798', '49290', '23935', '22652', '63136', '50764', '62188', '58054', '65408', '32111', '62653', '70584'] # e.g., ["89409", "68884"]
 
 # %%
 # Define the range of rows to plot
-start_row = 50
-end_row = 100
+start_row = 120
+end_row = 320
 
 
 # %%
@@ -187,6 +187,24 @@ plt.ylabel('Y-axis label')
 plt.title('Plotting selected columns (Rows {} to {})'.format(start_row, end_row))
 plt.legend()
 plt.tight_layout()
+plt.show()
+
+# %%
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Assuming 'selected_columns' is a list of columns you want to include in the heatmap
+columns_to_plot = [column for column in selected_columns if column in merged_activity_traces.columns]
+
+# Transpose the DataFrame
+heatmap_data = merged_activity_traces[columns_to_plot].T.iloc[:, start_row:end_row]
+
+# Create a heatmap
+sns.heatmap(heatmap_data, cmap='hot', annot=False, fmt='.2f', xticklabels=merged_activity_traces.index[start_row:end_row], yticklabels=columns_to_plot)
+
+plt.title("Combined Heatmap for Selected Columns")
+plt.xlabel('Time')  # You may need to customize this based on your data
+plt.ylabel('Columns')
 plt.show()
 
 # %%
