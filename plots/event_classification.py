@@ -18,9 +18,15 @@ event_duration_all= pd.concat([event_duration_FW, event_duration_T], axis=1)
 event_duration_all.columns = ['Forward', 'Turn']
 
 # %%
-# Create a box and whisker plot with individual data points
-sns.boxplot(data=event_duration_all, width=0.5)
-sns.stripplot(data=event_duration_all, color='black', jitter=True, alpha=0.5)
+# Create a plot with individual data points
+
+# Define a color palette with different colors
+custom_palette = ["cyan", "black"]
+
+# Use stripplot with the specified palette
+sns.boxplot(data=event_duration_all, width=0.1, color = 'white')
+sns.stripplot(data=event_duration_all, palette=custom_palette, jitter=True, alpha=0.5)
+
 
 # Set labels and title
 plt.xlabel('Conditions')
@@ -29,5 +35,11 @@ plt.title('Box and Whisker Plot with Individual Data Points')
 
 # Show the plot
 plt.show()
+
+# %%
+# Calculate the average for each column
+averages = event_duration_all.mean()
+
+
 
 # %%
