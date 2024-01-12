@@ -26,6 +26,21 @@ filtered_behavioural_data_and = behavioural_data[behavioural_data['beh'].isin(de
 # Show the filtered data
 print(filtered_behavioural_data_and)
 
+#%%
+#%%
+# Determinne event duration ("end" - "start")
+
+event_duration = filtered_behavioural_data_and['end'] - filtered_behavioural_data_and['start']
+print(event_duration)
+
+# Save the result to a new CSV file
+event_duration.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/TL-TR-event_durtion.csv', index=False)
+
+
+# Average duration
+avg_event_duration = event_duration.mean() 
+print(avg_event_duration)
+
 # %%
 # Read csvfile of merged activity traces
 #merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/out_3-3-1.csv')
