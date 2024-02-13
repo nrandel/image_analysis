@@ -18,18 +18,26 @@ event_duration_all.columns = ['Forward', 'Turn']
 # %%
 # Create a plot with individual data points
 
+plt.figure(figsize=(5, 7))
+
+# # Divide all values in the DataFrame by 3.44 (to transform frame to time Hz = 0.344)
+event_duration_all = event_duration_all.div(3.44)
+
 # Define a color palette with different colors
 custom_palette = ["cyan", "magenta"]
 
 # Use stripplot with the specified palette
-sns.boxplot(data=event_duration_all, width=0.1, color = 'white')
+sns.boxplot(data=event_duration_all, width=0.2, color = 'white')
 sns.stripplot(data=event_duration_all, palette=custom_palette, jitter=True, alpha=0.5)
 
 
 # Set labels and title
 plt.xlabel('Events')
-plt.ylabel('No of Frames')
+plt.ylabel('Time in sec')
 plt.title('Box and Whisker Plot with Individual Data Points')
+
+# Save the plot as an image file
+plt.savefig('/Users/nadine/Documents/paper/single-larva/generated-graphs/figures/drafts/event_duration.svg')
 
 # Show the plot
 plt.show()
