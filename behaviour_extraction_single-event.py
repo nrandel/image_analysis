@@ -81,7 +81,7 @@ print(start_time_points)
 # Define a range of specific time points to add/subtract
 '''Range of positive AND negative values'''
 negative_range = range(-60, 0)  # range(-10, 0) Range from -10 to -1
-positive_range = range(0, 15)    # range(0, 6) Range from 0 to 5
+positive_range = range(0, 20)    # range(0, 6) Range from 0 to 5
 
 # Merge the ranges into a single list
 time_points_range = list(negative_range) + list(positive_range)
@@ -102,7 +102,7 @@ event_time_ranges_df = pd.DataFrame(event_time_ranges, columns=['Event_Label', '
 
 # Export the DataFrame to a CSV file
 ''' Add timerange to file name '''
-event_time_ranges_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/alliged_behaviour/F-Decision-60_15TP.csv', index=False)
+event_time_ranges_df.to_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/alliged_behaviour/F-Decision-60_20TP.csv', index=False)
 
 
 # %%
@@ -110,10 +110,10 @@ event_time_ranges_df.to_csv('/Users/nadine/Documents/paper/single-larva/generate
 
 # Read the CSV files, specifying the 'Time_Points_Range' column to be converted using ast.literal_eval
 #merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/traces_3-3-1.csv')
-event_time_ranges_df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/alliged_behaviour/F-Decision-60_15TP.csv', converters={'Time_Points_Range': ast.literal_eval})
+event_time_ranges_df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/alliged_behaviour/F-Decision-60_20TP.csv', converters={'Time_Points_Range': ast.literal_eval})
 
 #TEST new csv r=2000nm
-merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/measurements_ID.csv') 
+merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/clemclam-coordinates/measurements.csv') 
 
 
 # Truncated event_time_range
@@ -147,6 +147,6 @@ for _, row in event_time_ranges_df.iterrows():
 result_df = pd.concat(final_output, ignore_index=True)
 
 # Save the result to a new CSV file
-result_df.to_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_F-Decision-60_15TP.csv', index=False)
+result_df.to_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_F-Decision-60_20TP-ClemClam.csv', index=False)
 
 # %%
