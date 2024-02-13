@@ -6,13 +6,13 @@ from scipy.signal import savgol_filter
 # %%
 # Read the CSV file into a DataFrame
 # Single behaviour
-final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_F-Decision-60_15TP.csv') #single event-type
+#final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_F-Decision-60_20TP-ClemClam.csv') #single event-type
 
 # truncated single behaviour
 #final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action_selection/final_output_Tl-TR-Decision-60_15TP_Event_1-15.csv') #single event-type
 
 # multiple behaviour
-#final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action_selection/final_output_Tl-TR-Decision-60_15TP.csv') #multiple event-type
+final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_TL-TR-Decision-60_20TP-ClemClam.csv') #multiple event-type
 
 # %%
 # Group by Event_Number and reset time point for each event to identify number of time points 
@@ -25,7 +25,7 @@ event_time_range = event_time_range_max - event_time_range_min
 
 # %%
 # Define the neurons you want to include in the plot
-neurons_to_plot = [62188, 58054]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
+neurons_to_plot = [69798, 49290]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
 
 
 # %%
@@ -33,7 +33,7 @@ neurons_to_plot = [62188, 58054]  # Replace with the specific neuron IDs you wan
 
 plt.figure(figsize=(10, 6))  # Adjust figure size if needed
 for neuron_id in neurons_to_plot:
-    #plt.subplot(len(neurons_to_plot), 1, neurons_to_plot.index(neuron_id) + 1) # select if individual plots for each neuron
+    plt.subplot(len(neurons_to_plot), 1, neurons_to_plot.index(neuron_id) + 1) # select if individual plots for each neuron
     for event_label, event_data in final_output[final_output['Neuron'] == neuron_id].groupby('Event_Number'):
         time_point_range = event_time_range.loc[event_label] + 1  # Fetch time point range for the event (+1 for inclusive range)
         time_points = range(time_point_range)  # Create range based on the time point range
@@ -50,6 +50,9 @@ for neuron_id in neurons_to_plot:
     plt.xlabel(f'Time (Reset for Each Event, Range: 0-{time_point_range - 1})')
     plt.ylabel(f'Neuron {neuron_id} Value')
     plt.title(f'Values per Event over Reset Time Points for Neuron {neuron_id}')
+
+    # Set custom tick labels for x-axis
+    plt.xticks(range(0, time_point_range, 10))
     #plt.legend()
 
 plt.tight_layout()
@@ -119,11 +122,11 @@ for neuron_id in neurons_to_plot:
             continue  # Skip plotting this event
  
         smoothed_values = savgol_filter(values, window_length=7, polyorder=3)  # Adjust window length and polynomial order as needed (e.g., window length 5)
-        #plt.plot(time_points, smoothed_values, label=f'Smoothed Event {event_label}')
+        plt.plot(time_points, smoothed_values, label=f'Smoothed Event {event_label}')
 
         # Calculating the derivative using the Savitzky-Golay filter
-        derivative = savgol_filter(values, window_length=7, polyorder=3, deriv=1)  # Adjust parameters as needed (e.g., window_length=5, polyorder=2, deriv=2)
-        plt.plot(time_points, derivative, label=f'Derivative Event {event_label}')  # Plot derivative
+        #derivative = savgol_filter(values, window_length=7, polyorder=3, deriv=1)  # Adjust parameters as needed (e.g., window_length=5, polyorder=2, deriv=2)
+        #plt.plot(time_points, derivative, label=f'Derivative Event {event_label}')  # Plot derivative
 
     plt.xlabel(f'Time (Reset for Each Event, Range: 0-{time_point_range - 1})')
     plt.ylabel(f'Neuron {neuron_id} Value')
