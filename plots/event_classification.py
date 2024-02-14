@@ -21,7 +21,7 @@ event_duration_all.columns = ['Forward', 'Turn']
 plt.figure(figsize=(5, 7))
 
 # # Divide all values in the DataFrame by 3.44 (to transform frame to time Hz = 0.344)
-event_duration_all = event_duration_all.div(3.44)
+event_duration_all = event_duration_all.mul(0.344)
 
 # Define a color palette with different colors
 custom_palette = ["cyan", "magenta"]
