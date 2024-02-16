@@ -49,3 +49,27 @@ averages = event_duration_all.mean()
 
 
 # %%
+# Barplot
+
+import matplotlib.pyplot as plt
+
+# Data
+categories = ['forward', 'turn']
+values = [12,  42]
+colors = ['cyan', 'magenta']
+width = 0.5  # Width of the bars
+
+# Create bar plot
+plt.bar(categories, values, color=colors, width=width)
+
+# Add labels and title
+plt.xlabel('Categories')
+plt.ylabel('Values')
+plt.title('Bar Plot with Custom Colors and Width')
+
+# Save the plot as an image file
+plt.savefig('/Users/nadine/Documents/paper/single-larva/generated-graphs/figures/drafts/event_number.svg')
+
+
+# Show plot
+plt.show()
