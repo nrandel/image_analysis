@@ -208,26 +208,5 @@ plt.ylabel('Columns')
 plt.show()
 
 # %%
-# Barplot
-
-import matplotlib.pyplot as plt
-
-# Data
-categories = ['forward', 'turn']
-values = [12,  42]
-colors = ['cyan', 'magenta']
-width = 0.5  # Width of the bars
-
-# Create bar plot
-plt.bar(categories, values, color=colors, width=width)
-
-# Add labels and title
-plt.xlabel('Categories')
-plt.ylabel('Values')
-plt.title('Bar Plot with Custom Colors and Width')
-
-# Show plot
-plt.show()
-
 
 # %%
