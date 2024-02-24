@@ -51,7 +51,8 @@ averages = event_duration_all.mean()
 # %%
 # Barplot
 
-import matplotlib.pyplot as plt
+# Create a plot with individual data points
+plt.figure(figsize=(5, 7))
 
 # Data
 categories = ['forward', 'turn']
@@ -73,3 +74,4 @@ plt.savefig('/Users/nadine/Documents/paper/single-larva/generated-graphs/figures
 
 # Show plot
 plt.show()
+# %%
