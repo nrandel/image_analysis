@@ -138,3 +138,39 @@ plt.show()
 
 
 # %%
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Create a linear gradient from white to black
+gradient = np.linspace(0, 1, 256)
+gradient = np.vstack((gradient, gradient))
+
+# Plot the gradient
+plt.imshow(gradient, cmap='gray', aspect='auto')
+plt.axis('off')
+
+# Add a colorbar with greyscale values
+cbar = plt.colorbar()
+cbar.set_label('Intensity')
+
+plt.savefig('/Users/nadine/Desktop/greyscale.png')
+
+plt.show()
+
+# %%
+# Create a linear gradient for viridis
+gradient = np.linspace(0, 1, 256)
+gradient = np.vstack((gradient, gradient))
+
+# Plot the gradient
+plt.imshow(gradient, cmap='viridis', aspect='auto')
+plt.axis('off')
+
+# Add a colorbar with viridis values
+cbar = plt.colorbar()
+cbar.set_label('Intensity')
+
+plt.savefig('/Users/nadine/Desktop/viridis.png')
+plt.show()
+
+# %%
