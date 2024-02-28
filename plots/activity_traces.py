@@ -6,13 +6,13 @@ from scipy.signal import savgol_filter
 # %%
 # Read the CSV file into a DataFrame
 # Single behaviour
-final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_F-Decision-60_20TP-ClemClam.csv') #single event-type
+#final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_F-Decision-60_20TP-ClemClam.csv') #single event-type
 
 # truncated single behaviour
 #final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action_selection/final_output_Tl-TR-Decision-60_15TP_Event_1-15.csv') #single event-type
 
 # multiple behaviour
-#final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_TL-TR-Decision-60_20TP-ClemClam.csv') #multiple event-type
+final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_TL-TR-Decision-60_20TP-ClemClam.csv') #multiple event-type
 
 # %%
 # Group by Event_Number and reset time point for each event to identify number of time points 
@@ -25,7 +25,7 @@ event_time_range = event_time_range_max - event_time_range_min
 
 # %%
 # Define the neurons you want to include in the plot
-neurons_to_plot = [69798, 49290]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
+neurons_to_plot = [9233, 23971]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
 
 # %%
 # Print the values of the specific column
@@ -185,16 +185,21 @@ plt.savefig('/Users/nadine/Desktop/viridis.png')
 plt.show()
 
 # %%
-# ONLY USE FOR SPECIFIC EVENTS Not working
-
+# ONLY USE FOR SPECIFIC EVENTS  
 
 plt.figure(figsize=(10, 6))
 
+# Define the neurons you want to include in the plot
+neurons_to_plot = [24958, 24006]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
+
+
 # Define the event numbers you want to include in the plot
 column_name = 'Event_Number'  
-#print(final_output[column_name])
+print(final_output[column_name])
 
-event_numbers_to_plot = ['F_1', 'F_2']  # Replace 'F_1', 'F_2', etc., with the specific values you want to filter
+#event_numbers_to_plot = ['F_1', 'F_2']  # Replace 'F_1', 'F_2', etc., with the specific values you want to filter
+event_numbers_to_plot = ["['TL', 'TR']_2"]  # Replace 'F_1', 'F_2', etc., with the specific values you want to filter
+
 
 # Filter the DataFrame based on the specified event numbers
 filtered_data = final_output[final_output[column_name].isin(event_numbers_to_plot)]
