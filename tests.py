@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 
 #%%
 # Read csvfile of merged activity traces
-merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/traces_3-3-1.csv')
+#merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/traces_3-3-1.csv')
+merged_activity_traces = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/clemclam-coordinates/measurements.csv')
 
 # %%
 # Display available columns
@@ -17,25 +18,42 @@ print(list(merged_activity_traces.columns))
 
 # %%
 # Select columns
-selected_columns = ['73673', '89409', '68884', '48991', '50620', '61198', '56311', '50663', '24746', '23967', '85110', '24958', '24006', '45819', '36672', '9233', '23971', '35672', '66113', '33923', '25217', '26236', '57617', '48584', '56730', '32240', '50631', '71849', '24010', '69798', '49290', '23935', '22652', '63136', '50764', '62188', '58054', '65408', '32111', '62653', '70584'] # e.g., ["89409", "68884"]
-
+#selected_columns = ['73673', '89409', '68884', '48991', '50620', '61198', '56311', '50663', '24746', '23967', '85110', '24958', '24006', '45819', '36672', '9233', '23971', '35672', '66113', '33923', '25217', '26236', '57617', '48584', '56730', '32240', '50631', '71849', '24010', '69798', '49290', '23935', '22652', '63136', '50764', '62188', '58054', '65408', '32111', '62653', '70584'] # e.g., ["89409", "68884"]
+selected_columns = ['56311']
 # %%
 # Define the range of rows to plot
-start_row = 120
-end_row = 320
+start_row = 1
+end_row = 11000
 
 
 # %%
+
+
+plt.figure(figsize=(400, 30))
 # Plot the selected columns for the specified rows
 for column in selected_columns:
     if column in merged_activity_traces.columns:
         plt.plot(merged_activity_traces.index[start_row:end_row], merged_activity_traces[column].iloc[start_row:end_row], label=column)
 
 # Add labels and legend
-plt.xlabel('X-axis label')
-plt.ylabel('Y-axis label')
+plt.xlabel('frames')
+plt.ylabel('df/f')
+
+# Set ticks every other value on the x-axis
+#plt.xticks(range(start_row, end_row, 2))
+# Label every 20th value
+#labels = ['' if i % 20 != 0 else str(i) for i in range(start_row, end_row)]
+#plt.gca().set_xticklabels(labels)
+
+# Label every 10th value without the tick
+plt.xticks(range(start_row, end_row, 20))  # Assuming your index values represent frames
+
+
 plt.title('Plotting selected columns (Rows {} to {})'.format(start_row, end_row))
 plt.legend()
+
+plt.savefig('/Users/nadine/Desktop/test.png')
+
 plt.show()
 
 # %%

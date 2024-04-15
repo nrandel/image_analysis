@@ -12,7 +12,7 @@ from scipy.signal import savgol_filter
 #final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/generated-data/Fluorescence-traces/2023-12-05/radius_3-3-1/Action_selection/final_output_Tl-TR-Decision-60_15TP_Event_1-15.csv') #single event-type
 
 # multiple behaviour
-final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_TL-TR-Decision-60_20TP-ClemClam.csv') #multiple event-type
+final_output = pd.read_csv('/Users/nadine/Documents/paper/single-larva/ACardona_dff-file/final_output_TL-TR-Decision-50_20TP-ClemClam.csv') #multiple event-type
 
 # %%
 # Group by Event_Number and reset time point for each event to identify number of time points 
@@ -190,15 +190,15 @@ plt.show()
 plt.figure(figsize=(10, 6))
 
 # Define the neurons you want to include in the plot
-neurons_to_plot = [24958, 24006]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
+neurons_to_plot = [73673, 89409]  # Replace with the specific neuron IDs you want to include, e.g., [73673, 89409]
 
 
 # Define the event numbers you want to include in the plot
 column_name = 'Event_Number'  
-print(final_output[column_name])
+#print(final_output[column_name])
 
 #event_numbers_to_plot = ['F_1', 'F_2']  # Replace 'F_1', 'F_2', etc., with the specific values you want to filter
-event_numbers_to_plot = ["['TL', 'TR']_2"]  # Replace 'F_1', 'F_2', etc., with the specific values you want to filter
+event_numbers_to_plot = ["['TL', 'TR']_2", "['TL', 'TR']_3", "['TL', 'TR']_4"]  # Replace 'F_1', 'F_2', etc., with the specific values you want to filter
 
 
 # Filter the DataFrame based on the specified event numbers
@@ -230,6 +230,28 @@ for neuron_id in neurons_to_plot:
     #plt.legend()
 
 plt.tight_layout()
+plt.show()
+
+# %%
+# plot fot sigle cell ca-imaging
+
+#import csv
+single_cell_activity = pd.read_csv('/Users/nadine/Desktop/ak2_20240330_141859.csv') 
+
+# line plot with selection of specific indecies
+# Set the index column (!0-index, but behaviour read-out 1-idex)
+single_cell_activity.set_index(single_cell_activity.columns[0], inplace=True)
+
+# Step 3: Select a range according to index
+start_index = '1900'
+end_index = '2000'
+selected_data = single_cell_activity.loc[start_index:end_index]
+
+# Step 4: Plot the selected data
+selected_data.plot(kind='line', legend=False)  # You can customize the plot further if needed
+plt.xlabel('Index')  # Set the label for the x-axis
+plt.ylabel('Data')   # Set the label for the y-axis
+plt.title('Line Plot of Selected Range')  # Set the title of the plot
 plt.show()
 
 # %%

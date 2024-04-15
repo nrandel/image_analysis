@@ -15,8 +15,8 @@ print(ad_connectivity_matrix.index) #row names
 
 # %%
 # Find a specific cell using row and column names
-row_name = 29
-col_name = '9469519'
+row_name = 3044500 #pre-syn
+col_name = '13749806' #post-syn
 
 cell_value = ad_connectivity_matrix.loc[row_name, col_name]
 print(f"The value at row '{row_name}' and column '{col_name}' is: {cell_value}")
