@@ -234,24 +234,89 @@ plt.show()
 
 # %%
 # plot fot sigle cell ca-imaging
-
 #import csv
-single_cell_activity = pd.read_csv('/Users/nadine/Desktop/ak2_20240330_141859.csv') 
+single_cell_activity = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/measurements/a_4245_2_20240425_142343.measurements.csv') 
 
-# line plot with selection of specific indecies
-# Set the index column (!0-index, but behaviour read-out 1-idex)
-single_cell_activity.set_index(single_cell_activity.columns[0], inplace=True)
+#%%
+#remove all columns except activity traces
+column_to_drop = 'timepoint'
 
-# Step 3: Select a range according to index
-start_index = '1900'
-end_index = '2000'
+# Drop the specified column
+single_cell_activity.drop(columns=[column_to_drop], inplace=True)
+
+#%%
+# Set the index column (!0-index, but behaviour read-out 1-idex), if required from input
+#single_cell_activity.set_index(single_cell_activity.columns[0], inplace=True)
+
+#%%
+# Convert the index to integer if it's not already (assuming the index should be numeric)
+single_cell_activity.index = pd.to_numeric(single_cell_activity.index, errors='coerce')
+
+# Drop any rows where the index conversion resulted in NaN
+single_cell_activity.dropna(inplace=True)
+
+# Convert the index to integer type
+single_cell_activity.index = single_cell_activity.index.astype(int)
+
+#%%
+#Select a range according to index
+start_index = 0
+end_index = 3000
 selected_data = single_cell_activity.loc[start_index:end_index]
 
+#%%
 # Step 4: Plot the selected data
+plt.figure(figsize=(50, 6))  # Adjust figure size if needed
 selected_data.plot(kind='line', legend=False)  # You can customize the plot further if needed
 plt.xlabel('Index')  # Set the label for the x-axis
 plt.ylabel('Data')   # Set the label for the y-axis
 plt.title('Line Plot of Selected Range')  # Set the title of the plot
 plt.show()
+
+# %%
+#TEST
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Read the CSV file into a DataFrame
+file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/measurements/1_1_20240303_171154.measurements.csv'
+single_cell_activity = pd.read_csv(file_path)
+
+# Remove all columns except activity traces (assuming 'timepoint' is the only non-activity trace column)
+column_to_drop = 'timepoint'
+single_cell_activity.drop(columns=[column_to_drop], inplace=True)
+
+# Convert the index to integer if it's not already (assuming the index should be numeric)
+single_cell_activity.index = pd.to_numeric(single_cell_activity.index, errors='coerce')
+
+# Drop any rows where the index conversion resulted in NaN
+single_cell_activity.dropna(inplace=True)
+
+# Convert the index to integer type
+single_cell_activity.index = single_cell_activity.index.astype(int)
+
+# Select a range according to index
+start_index = 0
+end_index = 100
+selected_data = single_cell_activity.loc[start_index:end_index]
+
+# Create the figure and set the size
+fig, ax = plt.subplots(figsize=(30, 6))  # Set the plot size (width, height in inches)
+
+# Plot the selected data
+selected_data.plot(kind='line', marker='o', ax=ax)
+
+# Set the labels and title
+ax.set_xlabel('Index')
+ax.set_ylabel('Activity')
+ax.set_title('Single Cell Activity')
+
+# Set the x-axis label tick interval to 1
+ax.set_xticks(range(start_index, end_index + 1))
+
+# Display the plot
+plt.show()
+
 
 # %%
