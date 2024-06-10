@@ -99,10 +99,10 @@ print(non_responsive_neurons)
 
 # Save neurons to CSV files with specified path
 save_neurons_to_csv(responsive_neurons_peak, "responsive_neurons_peak.csv", path='/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/')
-save_neurons_to_csv(responsive_neurons_average, "responsive_neurons_average.csv", path='/path/to/save')
-save_neurons_to_csv(difference_neurons, "difference_neurons.csv", path='/path/to/save')
-save_neurons_to_csv(responsive_neurons_intersection, "responsive_neurons_intersection.csv", path='/path/to/save')
-save_neurons_to_csv(non_responsive_neurons, "non_responsive_neurons.csv", path='/path/to/save')
+save_neurons_to_csv(responsive_neurons_average, "responsive_neurons_average.csv", path='/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/')
+save_neurons_to_csv(difference_neurons, "difference_neurons.csv", path='/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/')
+#save_neurons_to_csv(responsive_neurons_intersection, "responsive_neurons_intersection.csv", path='/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/')
+#save_neurons_to_csv(non_responsive_neurons, "non_responsive_neurons.csv", path='/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/')
 
 # Define start and end times for plotting 
 # Note: stimulus window 101-106
