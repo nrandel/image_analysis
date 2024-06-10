@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 #1. pick a certain time window after the first stimulus onset and compute the peak DF/F and the average DF/F in that time window for each cell body
 #2. Compute the mean peak and the mean average across all cell bodies, and the SD.
 #3. Find all neurons whose responses are 1.5 SD higher than the overall mean
+
 # %%
 # Read the CSV file into a DataFrame
 # raw fluorescence 1099
@@ -15,6 +16,7 @@ import matplotlib.pyplot as plt
 # dff long sliding window 1099
 #dff_long = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks.csv')
 
+#stimulus window 101-106
 #%%
 #calculate cell specific dff from raw fluorescence
 #TODO
@@ -32,14 +34,19 @@ def plot_neuron_activity(df, neurons, time_range, title):
     plt.grid(True)
     plt.show()
 
+def save_neurons_to_csv(neurons, filename, path=''):  # Add a path parameter with default value ''
+    filepath = os.path.join(path, filename)  # Construct the full file path
+    pd.DataFrame(neurons).to_csv(filepath, header=False)
+
+
 # Load the dataset from the CSV file
 df = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks.csv')
 
 # Drop the 'timepoint' column and use the index as the new timepoint
 df.drop(columns=['timepoint'], inplace=True)
 
-# Define the time window (102-117, inclusive)
-time_window = list(range(102, 118))
+# Define the time window (102-117, inclusive). Stimulus window 101-106
+time_window = list(range(102, 117))
 
 # Extract the relevant rows for the time window using the index as timepoint
 time_window_data = df.iloc[time_window]
@@ -79,20 +86,33 @@ print(responsive_neurons_peak)
 print("\nResponsive neurons based on average ΔF/F (count: {}):".format(len(responsive_neurons_average)))  # Number of neurons
 print(responsive_neurons_average)
 
+# Compute the difference between responsive_neurons_peak and responsive_neurons_average
+difference_neurons = responsive_neurons_peak.index.difference(responsive_neurons_average.index)
+print("\nDifference in neurons between peak and average ΔF/F (count: {}):".format(len(difference_neurons)))
+print(difference_neurons)
+
 print("\nNeurons that are responsive based on both peak and average ΔF/F (count: {}):".format(len(responsive_neurons_intersection)))  # Number of neurons
 print(responsive_neurons_intersection)
 
 print("\nNeurons that are not responsive for both peak and average ΔF/F (count: {}):".format(len(non_responsive_neurons)))  # Number of neurons
 print(non_responsive_neurons)
 
-# User input for timepoint range
-start_time = int(input("Enter start timepoint for plotting: "))
-end_time = int(input("Enter end timepoint for plotting: "))
+# Save neurons to CSV files with specified path
+save_neurons_to_csv(responsive_neurons_peak, "responsive_neurons_peak.csv", path='/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/')
+save_neurons_to_csv(responsive_neurons_average, "responsive_neurons_average.csv", path='/path/to/save')
+save_neurons_to_csv(difference_neurons, "difference_neurons.csv", path='/path/to/save')
+save_neurons_to_csv(responsive_neurons_intersection, "responsive_neurons_intersection.csv", path='/path/to/save')
+save_neurons_to_csv(non_responsive_neurons, "non_responsive_neurons.csv", path='/path/to/save')
+
+# Define start and end times for plotting 
+# Note: stimulus window 101-106
+start_time = 80
+end_time = 150
 time_range = (start_time, end_time)
 
 # Plot results
 plot_neuron_activity(df, responsive_neurons_peak.index, time_range, 'Responsive neurons based on peak ΔF/F')
 plot_neuron_activity(df, responsive_neurons_average.index, time_range, 'Responsive neurons based on average ΔF/F')
-plot_neuron_activity(df, responsive_neurons_intersection, time_range, 'Neurons responsive based on both peak and average ΔF/F')
-plot_neuron_activity(df, non_responsive_neurons, time_range, 'Neurons not responsive for both peak and average ΔF/F')
+#plot_neuron_activity(df, responsive_neurons_intersection, time_range, 'Neurons responsive based on both peak and average ΔF/F')
+#plot_neuron_activity(df, non_responsive_neurons, time_range, 'Neurons not responsive for both peak and average ΔF/F')
 # %%
