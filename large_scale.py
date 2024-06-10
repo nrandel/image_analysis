@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 #%%
 #1. pick a certain time window after the first stimulus onset and compute the peak DF/F and the average DF/F in that time window for each cell body
@@ -37,7 +38,6 @@ def plot_neuron_activity(df, neurons, time_range, title):
 def save_neurons_to_csv(neurons, filename, path=''):  # Add a path parameter with default value ''
     filepath = os.path.join(path, filename)  # Construct the full file path
     pd.DataFrame(neurons).to_csv(filepath, header=False)
-
 
 # Load the dataset from the CSV file
 df = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks.csv')
@@ -97,13 +97,28 @@ print(responsive_neurons_intersection)
 print("\nNeurons that are not responsive for both peak and average ΔF/F (count: {}):".format(len(non_responsive_neurons)))  # Number of neurons
 print(non_responsive_neurons)
 
-# Save neurons to CSV files with specified path
-save_neurons_to_csv(responsive_neurons_peak, "responsive_neurons_peak.csv", path='/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/')
-save_neurons_to_csv(responsive_neurons_average, "responsive_neurons_average.csv", path='/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/')
-save_neurons_to_csv(difference_neurons, "difference_neurons.csv", path='/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/')
-#save_neurons_to_csv(responsive_neurons_intersection, "responsive_neurons_intersection.csv", path='/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/')
-#save_neurons_to_csv(non_responsive_neurons, "non_responsive_neurons.csv", path='/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/')
+# Define the directory where you want to save the files
+save_dir = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/'
 
+# Save neurons to CSV files with specified path
+save_neurons_to_csv(responsive_neurons_peak, "responsive_neurons_peak.csv", path=save_dir)
+save_neurons_to_csv(responsive_neurons_average, "responsive_neurons_average.csv", path=save_dir)
+save_neurons_to_csv(difference_neurons, "difference_neurons.csv", path=save_dir)
+save_neurons_to_csv(responsive_neurons_intersection, "responsive_neurons_intersection.csv", path=save_dir)
+save_neurons_to_csv(non_responsive_neurons, "non_responsive_neurons.csv", path=save_dir)
+
+# Save the original CSV file with only the columns corresponding to the responsive neurons
+df_responsive_neurons_peak = df[list(responsive_neurons_peak.index)]
+df_responsive_neurons_average = df[list(responsive_neurons_average.index)]
+df_difference_neurons = df[list(difference_neurons)]
+df_responsive_neurons_intersection = df[list(responsive_neurons_intersection)]
+df_non_responsive_neurons = df[list(non_responsive_neurons)]
+
+df_responsive_neurons_peak.to_csv(os.path.join(save_dir, "activity_of_responsive_neurons_peak.csv"), index=False)
+df_responsive_neurons_average.to_csv(os.path.join(save_dir, "activity_of_responsive_neurons_average.csv"), index=False)
+df_difference_neurons.to_csv(os.path.join(save_dir, "activity_of_difference_neurons.csv"), index=False)
+df_responsive_neurons_intersection.to_csv(os.path.join(save_dir, "activity_of_responsive_neurons_intersection.csv"), index=False)
+df_non_responsive_neurons.to_csv(os.path.join(save_dir, "activity_of_non_responsive_neurons.csv"), index=False)
 # Define start and end times for plotting 
 # Note: stimulus window 101-106
 start_time = 80
@@ -113,6 +128,7 @@ time_range = (start_time, end_time)
 # Plot results
 plot_neuron_activity(df, responsive_neurons_peak.index, time_range, 'Responsive neurons based on peak ΔF/F')
 plot_neuron_activity(df, responsive_neurons_average.index, time_range, 'Responsive neurons based on average ΔF/F')
-#plot_neuron_activity(df, responsive_neurons_intersection, time_range, 'Neurons responsive based on both peak and average ΔF/F')
+plot_neuron_activity(df, responsive_neurons_intersection, time_range, 'Neurons responsive based on both peak and average ΔF/F')
 #plot_neuron_activity(df, non_responsive_neurons, time_range, 'Neurons not responsive for both peak and average ΔF/F')
-# %%
+
+#%%
