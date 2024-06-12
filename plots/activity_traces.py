@@ -238,7 +238,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read the CSV file into a DataFrame
-file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/measurements/a_k_3__20240330_154256.measurements.csv'
+file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/measurements/3_1_20240306_155600.measurements.csv'
 single_cell_activity = pd.read_csv(file_path)
 
 # Remove all columns except activity traces (assuming 'timepoint' is the only non-activity trace column)
@@ -269,7 +269,7 @@ selected_data.plot(kind='line', ax=ax)
 # Set the labels and title
 ax.set_xlabel('Index')
 ax.set_ylabel('Activity')
-ax.set_title('MBON-e1-ak3')
+ax.set_title('CP4 8-ab 3_1')
 
 # Set the x-axis label tick interval to 1
 #ax.set_xticks(range(start_index, end_index + 1))
