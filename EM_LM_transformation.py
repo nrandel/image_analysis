@@ -69,8 +69,55 @@ print(f"Output saved to {output_csv_path}")
 # Note: The outfile contains the EM centroid with all rood nodes from the brain lobes
 # The order of the xyz coordinates (Catmaid out put) is preserved
 
-# Add a column of the skeleton-ID  to the output_df
+#Load the second CSV file.
+#Identify the common columns for matching.
+#Find the rows in the second CSV where the values in these common columns match those in the output_df.
+#Concatenate the matching rows from the second CSV with the output_df.
 
+# Import
+import numpy as np
+import pandas as pd
+
+# Paths to the files
+output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/output_centroids_and_coords.csv'
+second_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/skeleton_coordinates.csv'
+
+# Load the output_df from the previous script
+output_df = pd.read_csv(output_csv_path)
+
+# Load the second CSV file
+second_df = pd.read_csv(second_csv_path)
+
+# Display the headers of the second CSV file to understand the current column names
+print(f"Headers of the second CSV file: {second_df.columns.tolist()}")
+
+# Identify the expected common columns for matching
+common_columns = ['x', 'y', 'z']
+
+# Mapping of old headers to new headers if necessary
+# Replace 'old_x_header', 'old_y_header', and 'old_z_header' with actual column names in the second CSV file
+header_mapping = {
+    ' x': 'x',
+    ' y': 'y',
+    ' z': 'z'
+}
+
+# Rename headers of the second CSV to ensure they match the output_df headers
+second_df.rename(columns=header_mapping, inplace=True)
+
+# Ensure the common columns exist in both dataframes after renaming
+for column in common_columns:
+    if column not in output_df.columns or column not in second_df.columns:
+        raise ValueError(f"Column '{column}' not found in both dataframes")
+
+# Merge the dataframes on the common columns
+merged_df = pd.merge(output_df, second_df, on=common_columns, how='inner')
+
+# Save the merged dataframe to a new CSV file
+merged_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/merged_output.csv'
+merged_df.to_csv(merged_csv_path, index=False)
+
+print(f"Merged output saved to {merged_csv_path}")
 
 
 
