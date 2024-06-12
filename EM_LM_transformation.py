@@ -51,7 +51,6 @@ print(f"Processed output saved to {output_csv_path}")
 import numpy as np
 import pandas as pd
 from scipy.spatial import KDTree
-import tifffile as tiff
 from tqdm import tqdm
 
 # Conversion factor from micrometers to nanometers
@@ -65,15 +64,13 @@ xyz_coordinates_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/skeleton
 output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/output_centroids_and_coords.csv'
 no_xyz_output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/nuclei_without_xyz.csv'
 
-
 # Load the centroids CSV file
 centroids_df = pd.read_csv(centroids_csv_path)
 # Rename columns for clarity
 centroids_df.rename(columns={'x': 'centroid_x', 'y': 'centroid_y', 'z': 'centroid_z'}, inplace=True)
 
-# Display the headers of the XYZ coordinates file
+# Display the headers of the centroids_df CSV file
 print(f"Headers of the centroids_df CSV file: {centroids_df.columns.tolist()}")
-
 
 # Load the XYZ coordinates
 xyz_coordinates = pd.read_csv(xyz_coordinates_path)
@@ -97,10 +94,18 @@ kdtree = KDTree(coordinates_micrometers)
 closest_coords = []
 no_xyz_segments = []
 
+# Track used coordinates
+used_indices = set()
+
 for idx, centroid in tqdm(enumerate(centroids), desc='Assigning closest coordinates', total=len(centroids)):
     centroid_position = np.array(centroid)
     distance, index = kdtree.query(centroid_position)
-    if distance < np.inf:  # Ensure there is a match
+    
+    # Ensure there is a match and the coordinate hasn't been used
+    if distance < np.inf and index not in used_indices:  
+        # Mark the coordinate as used
+        used_indices.add(index)
+        
         # Centroid in nanometers
         centroid_nm = centroid_position * MICROMETERS_TO_NANOMETERS
         skeleton_id = xyz_coordinates.iloc[index]['skeleton_id']
@@ -112,7 +117,7 @@ for idx, centroid in tqdm(enumerate(centroids), desc='Assigning closest coordina
 columns = ['skeleton_id', 'centroid_z_nm', 'centroid_y_nm', 'centroid_x_nm', 'x', 'y', 'z']
 output_df = pd.DataFrame(closest_coords, columns=columns)
 
-no_xyz_df = pd.DataFrame(no_xyz_segments, columns=['skeleton_id'])
+no_xyz_df = pd.DataFrame(no_xyz_segments, columns=['centroid_index'])
 
 # Save the results to CSV files
 output_df.to_csv(output_csv_path, index=False)
@@ -120,6 +125,7 @@ no_xyz_df.to_csv(no_xyz_output_csv_path, index=False)
 
 print(f"Merged output saved to {output_csv_path}")
 print(f"Nuclei without XYZ coordinates saved to {no_xyz_output_csv_path}")
+
 
 
 
