@@ -12,10 +12,10 @@ import os
 # %%
 # Read the CSV file into a DataFrame
 # raw fluorescence 1099
-#raw_fluorescence = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_klb.csv') 
+#raw_fluorescence = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_klb-raw_data.csv') 
 
 # dff long sliding window 1099
-#dff_long = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks.csv')
+#dff_long = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks-dff_long-slidingWindow.csv')
 
 #stimulus window 101-106
 #%%
@@ -40,7 +40,7 @@ def save_neurons_to_csv(neurons, filename, path=''):  # Add a path parameter wit
     pd.DataFrame(neurons).to_csv(filepath, header=False)
 
 # Load the dataset from the CSV file
-df = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks.csv')
+df = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks-dff_long-slidingWindow.csv')
 
 # Drop the 'timepoint' column and use the index as the new timepoint
 df.drop(columns=['timepoint'], inplace=True)
