@@ -6,10 +6,8 @@ import pandas as pd
 from tqdm import tqdm
 
 #%%
-# Find from brain segmentation, which of the segmented nuclei has at least a single node
-# 1) from catmaid skeleton-ID find for each skeleton the largest node radius. 
+# Find from catmaid skeleton-ID for each skeleton the largest node radius. 
 # output: csv file containing only one node & coordinates per skeleton ID
-# 2) Overlapp between segmented nuclei and skeleton-ID (next code block)--> find traced and non-traced cells
 
 # Path to the input file
 input_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/skeleton_coordinates.csv'
@@ -35,10 +33,53 @@ result_df.to_csv(output_csv_path, index=False)
 
 print(f"Processed output saved to {output_csv_path}")
 
+#%%
+
+# Test input 3D tif file with segmented areas, csv with xyz coordinates.
+#output all segmented areas that overlap with a xyz coordinate
+
+import numpy as np
+import pandas as pd
+import tifffile
+
+# Step 1: Load and Process the 3D TIFF File (Segmented Areas)
+def load_tiff_stack(tiff_file):
+    return tifffile.imread(tiff_file)
+
+segmented_tiff_file = '/path/to/segmented_areas.tif'
+segmented_areas = load_tiff_stack(segmented_tiff_file)
+
+# Step 2: Load XYZ Coordinates from CSV
+csv_file = '/path/to/xyz_coordinates.csv'
+xyz_data = pd.read_csv(csv_file)
+
+# Step 3: Identify Segmented Areas Overlapping with XYZ Coordinates
+overlapping_segments = []
+
+for index, row in xyz_data.iterrows():
+    x, y, z = int(row['x']), int(row['y']), int(row['z'])
+    
+    # Check if the coordinates are within the segmented areas
+    if 0 <= x < segmented_areas.shape[0] and 0 <= y < segmented_areas.shape[1] and 0 <= z < segmented_areas.shape[2]:
+        if segmented_areas[x, y, z] == 1:  # Assuming segmented areas are marked as 1 in the TIFF stack
+            overlapping_segments.append((x, y, z))
+
+# Step 4: Output the Results
+print("Overlapping Segmented Areas:")
+for segment in overlapping_segments:
+    print(f"Segmented Area at (x={segment[0]}, y={segment[1]}, z={segment[2]})")
+
+
+
+
+
+
+
+
 
 #%% 
-#TODO
-# Input: Segmented EM nuclei and skeleton root nodes (not transformed == raw Catmaid output from previous code block)
+#TODO Output needs testing
+# Input: Segmented EM nuclei (S0 or s4) and skeleton root nodes S0 or S4 (not transformed == raw Catmaid output from previous code block)
 # Output: Centroid (EM nuclei) and root node coordinates that overlap in nuclei segmentation
 
 #Load the segmented 3D nuclei TIFF file.
@@ -53,16 +94,16 @@ import pandas as pd
 from scipy.spatial import KDTree
 from tqdm import tqdm
 
-# Conversion factor from micrometers to nanometers
-MICROMETERS_TO_NANOMETERS = 1000
 
 # Paths to the input files
-centroids_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/centroids_brain-only_z-450.csv'
-xyz_coordinates_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/skeleton_coordinates_soma.csv'
+# S4 resollution
+centroids_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/centroids_brain-only_z-450.csv' # in um
+xyz_coordinates_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S4-skeleton_coordinates_soma.csv' # in um
 
 # Path to save the output files
-output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/output_centroids_and_coords.csv'
-no_xyz_output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/nuclei_without_xyz.csv'
+# S4 resolution
+output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-output_centroids_and_coords.csv'
+no_xyz_output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-nuclei_without_xyz.csv'
 
 # Load the centroids CSV file
 centroids_df = pd.read_csv(centroids_csv_path)
@@ -75,20 +116,23 @@ print(f"Headers of the centroids_df CSV file: {centroids_df.columns.tolist()}")
 # Load the XYZ coordinates
 xyz_coordinates = pd.read_csv(xyz_coordinates_path)
 
+# Define the subset of columns you want to keep
+desired_columns = ['skeleton_id', 'x_s4', 'y_s4', 'z_s4'] 
+
+# Create a new dataframe with only the desired columns
+xyz_coordinates = xyz_coordinates[desired_columns]
+
 # Display the headers of the XYZ coordinates file
 print(f"Headers of the XYZ coordinates CSV file: {xyz_coordinates.columns.tolist()}")
 
 # Ensure coordinates are floats
-coordinates = xyz_coordinates[['x', 'y', 'z']].values
-
-# Convert coordinates from nanometers to micrometers for matching
-coordinates_micrometers = coordinates / MICROMETERS_TO_NANOMETERS
+coordinates = xyz_coordinates[['x_s4', 'y_s4', 'z_s4']].values
 
 # Ensure centroids are floats and get their values
 centroids = centroids_df[['centroid_z', 'centroid_y', 'centroid_x']].values
 
 # Build a KDTree for the coordinates in micrometers
-kdtree = KDTree(coordinates_micrometers)
+kdtree = KDTree(coordinates)
 
 # Find the closest XYZ coordinate for each centroid
 closest_coords = []
@@ -97,7 +141,7 @@ no_xyz_coords = []
 # Track used coordinates
 used_indices = set()
 
-for idx, xyz_coord in tqdm(enumerate(coordinates_micrometers), desc='Assigning closest coordinates', total=len(coordinates_micrometers)):
+for idx, xyz_coord in tqdm(enumerate(coordinates), desc='Assigning closest coordinates', total=len(coordinates)):
     closest_distance, closest_idx = np.inf, None
     for centroid_idx, centroid in enumerate(centroids):
         distance = np.linalg.norm(centroid - xyz_coord)
@@ -121,7 +165,94 @@ output_df.to_csv(output_csv_path, index=False)
 no_xyz_df.to_csv(no_xyz_output_csv_path, index=False)
 
 print(f"Merged output saved to {output_csv_path}")
-print(f"Nuclei without XYZ coordinates saved to {no_xyz_output_csv_path}")
+
+# Should print the centroid, not the Catmaid xyz TODO
+print(f"Nuclei without XYZ coordinates saved to {no_xyz_output_csv_path}") 
+
+
+
+#%%
+# test above code with threshold
+import numpy as np
+import pandas as pd
+from scipy.spatial import KDTree
+from tqdm import tqdm
+
+
+# Threshold distance in micrometers
+THRESHOLD_DISTANCE_MICROMETERS = 5
+
+# Paths to the input files
+
+# S4 resolution
+centroids_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/centroids_brain-only_z-450.csv'  # in um
+xyz_coordinates_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S4-skeleton_coordinates_soma.csv'  # in um
+
+# Path to save the output files
+# S4 resolution
+output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-output_centroids_and_coords_threshold_3um.csv'
+no_xyz_output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-nuclei_without_xyz_threshold_3um.csv'
+
+# Load the centroids CSV file
+centroids_df = pd.read_csv(centroids_csv_path)
+# Rename columns for clarity
+centroids_df.rename(columns={'x': 'centroid_x', 'y': 'centroid_y', 'z': 'centroid_z'}, inplace=True)
+
+# Load the XYZ coordinates
+xyz_coordinates = pd.read_csv(xyz_coordinates_path)
+
+# Define the subset of columns you want to keep
+desired_columns = ['skeleton_id', 'x_s4', 'y_s4', 'z_s4']
+
+# Create a new dataframe with only the desired columns
+xyz_coordinates = xyz_coordinates[desired_columns]
+
+# Ensure coordinates are floats
+coordinates = xyz_coordinates[['x_s4', 'y_s4', 'z_s4']].values
+
+# Ensure centroids are floats and get their values
+centroids = centroids_df[['centroid_z', 'centroid_y', 'centroid_x']].values
+
+# Build a KDTree for the coordinates in micrometers
+kdtree = KDTree(coordinates)
+
+# Find the closest XYZ coordinate for each centroid within the threshold distance
+closest_coords = []
+no_xyz_coords = []
+
+for centroid_idx, centroid in tqdm(enumerate(centroids), desc='Assigning closest coordinates', total=len(centroids)):
+    # Query the KDTree for points within threshold distance
+    closest_indices = kdtree.query_ball_point(centroid, THRESHOLD_DISTANCE_MICROMETERS)
+    
+    if closest_indices:
+        for idx in closest_indices:
+            closest_coord = coordinates[idx]
+            closest_coords.append([xyz_coordinates.iloc[idx]['skeleton_id'], *centroid, *closest_coord])
+            
+        # Mark all found XYZ coordinates as used
+        coordinates[closest_indices] = np.inf
+    
+# Create DataFrames for the results
+columns = ['skeleton_id', 'centroid_z', 'centroid_y', 'centroid_x', 'x_s4', 'y_s4', 'z_s4']
+output_df = pd.DataFrame(closest_coords, columns=columns)
+
+# Filter out rows where x_s4, y_s4, z_s4 are inf (indicating no corresponding XYZ found within threshold)
+no_xyz_df = pd.DataFrame(coordinates[~np.isinf(coordinates).any(axis=1)], columns=['x_s4', 'y_s4', 'z_s4'])
+
+# Save the results to CSV files
+output_df.to_csv(output_csv_path, index=False)
+no_xyz_df.to_csv(no_xyz_output_csv_path, index=False)
+
+print(f"Merged output saved to {output_csv_path}")
+
+
+
+
+
+
+
+
+
 
 
 
@@ -136,21 +267,51 @@ print(f"Nuclei without XYZ coordinates saved to {no_xyz_output_csv_path}")
 
 
 #%%
-# Because the Catmaid xyz out put is preserve the order is maintained. 
-# Therefore 
+# TODO Not working because the rows df1 are not df2 the same!!
+# Concatenate EM centroid s4 with transformed LM s4 
+# Change transformed LM s0! from nm to um
+
+import pandas as pd
+
+# Load the CSV files
+file1_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/centroids_brain-only_z-450.csv'
+file2_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S4-skeleton_coordinates_soma.csv'
+
+df1 = pd.read_csv(file1_path)
+df2 = pd.read_csv(file2_path)
+
+# Rename headers for df1
+df1.rename(columns={'x': 'centroid_x_s4', 'y': 'centroid_y_s4', 'z': 'centroid_z_s4'}, inplace=True)
+
+# Inspect the first few rows to determine the correct index column
+print("File 1 headers:", df1.columns)
+print("File 2 headers:", df2.columns)
+print("File 1 preview:\n", df1.head())
+print("File 2 preview:\n", df2.head())
+
+# Convert df2 coordinates from nanometers to microns
+df2[['x_s0', 'y_s0', 'z_s0']] = df2[['x_s0', 'y_s0', 'z_s0']] / 1000.0
+
+
+
+# Concatenate the DataFrames side by side
+concatenated_df = pd.concat([df1, df2], axis=1)
+
+# Save the concatenated DataFrame to a new CSV file
+concatenated_file_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/Concatenate-S4-centroid_skeleton_coordinates.csv'
+concatenated_df.to_csv(concatenated_file_path, index=False)
+
+print("Concatenated data saved to 'Concatenate-S4-centroid_skeleton_coordinates.csv''")
+
+
+
 
 
 # %%
 #TODO
-# Note: The output file from previous section contains the EM centroid with all rood nodes from the brain lobes
 
-
-#Load the second CSV file.
-#Identify the common columns for matching.
-#Find the rows in the second CSV where the values in these common columns match those in the output_df.
-#Concatenate the matching rows from the second CSV with the output_df.
-
-# Output: EM centroid, xyz coordinates, skeleton id
+# Inout csv: activtiy & concatenated file with skeleton id and centroid xyz
+# Output: act
 
 # Import
 import pandas as pd
