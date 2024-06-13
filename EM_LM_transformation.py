@@ -94,93 +94,8 @@ import pandas as pd
 from scipy.spatial import KDTree
 from tqdm import tqdm
 
-
-# Paths to the input files
-# S4 resollution
-centroids_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/centroids_brain-only_z-450.csv' # in um
-xyz_coordinates_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S4-skeleton_coordinates_soma.csv' # in um
-
-# Path to save the output files
-# S4 resolution
-output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-output_centroids_and_coords.csv'
-no_xyz_output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-nuclei_without_xyz.csv'
-
-# Load the centroids CSV file
-centroids_df = pd.read_csv(centroids_csv_path)
-# Rename columns for clarity
-centroids_df.rename(columns={'x': 'centroid_x', 'y': 'centroid_y', 'z': 'centroid_z'}, inplace=True)
-
-# Display the headers of the centroids_df CSV file
-print(f"Headers of the centroids_df CSV file: {centroids_df.columns.tolist()}")
-
-# Load the XYZ coordinates
-xyz_coordinates = pd.read_csv(xyz_coordinates_path)
-
-# Define the subset of columns you want to keep
-desired_columns = ['skeleton_id', 'x_s4', 'y_s4', 'z_s4'] 
-
-# Create a new dataframe with only the desired columns
-xyz_coordinates = xyz_coordinates[desired_columns]
-
-# Display the headers of the XYZ coordinates file
-print(f"Headers of the XYZ coordinates CSV file: {xyz_coordinates.columns.tolist()}")
-
-# Ensure coordinates are floats
-coordinates = xyz_coordinates[['x_s4', 'y_s4', 'z_s4']].values
-
-# Ensure centroids are floats and get their values
-centroids = centroids_df[['centroid_z', 'centroid_y', 'centroid_x']].values
-
-# Build a KDTree for the coordinates in micrometers
-kdtree = KDTree(coordinates)
-
-# Find the closest XYZ coordinate for each centroid
-closest_coords = []
-no_xyz_coords = []
-
-# Track used coordinates
-used_indices = set()
-
-for idx, xyz_coord in tqdm(enumerate(coordinates), desc='Assigning closest coordinates', total=len(coordinates)):
-    closest_distance, closest_idx = np.inf, None
-    for centroid_idx, centroid in enumerate(centroids):
-        distance = np.linalg.norm(centroid - xyz_coord)
-        if distance < closest_distance and centroid_idx not in used_indices:
-            closest_distance = distance
-            closest_idx = centroid_idx
-    if closest_idx is not None:
-        # Mark the centroid as used
-        used_indices.add(closest_idx)
-        closest_coords.append([xyz_coordinates.iloc[idx]['skeleton_id'], *centroids[closest_idx], *coordinates[idx]])
-    else:
-        no_xyz_coords.append([*xyz_coord])
-
-# Create DataFrames for the results
-columns = ['skeleton_id', 'centroid_z', 'centroid_y', 'centroid_x', 'x', 'y', 'z']
-output_df = pd.DataFrame(closest_coords, columns=columns)
-no_xyz_df = pd.DataFrame(no_xyz_coords, columns=['x', 'y', 'z'])
-
-# Save the results to CSV files
-output_df.to_csv(output_csv_path, index=False)
-no_xyz_df.to_csv(no_xyz_output_csv_path, index=False)
-
-print(f"Merged output saved to {output_csv_path}")
-
-# Should print the centroid, not the Catmaid xyz TODO
-print(f"Nuclei without XYZ coordinates saved to {no_xyz_output_csv_path}") 
-
-
-
-#%%
-# test above code with threshold
-import numpy as np
-import pandas as pd
-from scipy.spatial import KDTree
-from tqdm import tqdm
-
-
-# Threshold distance in micrometers
-THRESHOLD_DISTANCE_MICROMETERS = 5
+# Threshold distance in micrometers for all three axis
+THRESHOLD_DISTANCE_MICROMETERS = 8
 
 # Paths to the input files
 
@@ -190,8 +105,8 @@ xyz_coordinates_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S4-skele
 
 # Path to save the output files
 # S4 resolution
-output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-output_centroids_and_coords_threshold_3um.csv'
-no_xyz_output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-nuclei_without_xyz_threshold_3um.csv'
+output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-output_centroids_and_coords_threshold_8um.csv'
+no_xyz_output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-nuclei_without_xyz_threshold_8um.csv'
 
 # Load the centroids CSV file
 centroids_df = pd.read_csv(centroids_csv_path)
@@ -221,8 +136,8 @@ closest_coords = []
 no_xyz_coords = []
 
 for centroid_idx, centroid in tqdm(enumerate(centroids), desc='Assigning closest coordinates', total=len(centroids)):
-    # Query the KDTree for points within threshold distance
-    closest_indices = kdtree.query_ball_point(centroid, THRESHOLD_DISTANCE_MICROMETERS)
+    # Query the KDTree for points within threshold distance along all axes
+    closest_indices = kdtree.query_ball_point(centroid, THRESHOLD_DISTANCE_MICROMETERS, p=2)
     
     if closest_indices:
         for idx in closest_indices:
@@ -244,6 +159,7 @@ output_df.to_csv(output_csv_path, index=False)
 no_xyz_df.to_csv(no_xyz_output_csv_path, index=False)
 
 print(f"Merged output saved to {output_csv_path}")
+
 
 
 
