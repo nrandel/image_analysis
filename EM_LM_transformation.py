@@ -9,7 +9,9 @@ from tqdm import tqdm
 # Find from catmaid skeleton-ID for each skeleton the largest node radius. 
 # output: csv file containing only one node & coordinates per skeleton ID
 
-# Path to the input file
+import pandas as pd
+
+# Path to the input and output files
 input_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/skeleton_coordinates.csv'
 output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S0-skeleton_coordinates_soma.csv'
 
@@ -25,10 +27,7 @@ df.rename(columns={' skeleton_id': 'skeleton_id', ' r': 'r', ' x': 'x', ' y': 'y
 # Find the row with the largest 'r' value for each 'skeleton_id'
 result_df = df.loc[df.groupby('skeleton_id')['r'].idxmax()]
 
-# Sort the DataFrame by column 'r' in descending order
-result_df = df.sort_values(by='r', ascending=False)
-
-# Loop through the rows and drop rows where column 'C' is 0
+# Loop through the rows and drop rows where column 'r' is 0
 rows_to_drop = []
 for index, row in result_df.iterrows():
     if row['r'] == 0:
@@ -36,13 +35,17 @@ for index, row in result_df.iterrows():
 
 filtered_df = result_df.drop(rows_to_drop)
 
-# Remove the 'r' columns
+# Remove the 'r' column
 filtered_df = filtered_df.drop(columns=['r'])
 
-# Save the resulting dataframe to a new CSV file
+# Sort the DataFrame by column 'skeleton_id' in descending order
+filtered = df.sort_values(by='skeleton_id', ascending=False)
+
+# Save the resulting DataFrame to a new CSV file
 filtered_df.to_csv(output_csv_path, index=False)
 
 print(f"Processed output saved to {output_csv_path}")
+
 
 #%%
 
