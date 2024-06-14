@@ -148,163 +148,70 @@ print(f"S0 merged output saved to {output_csv_path_s0}")
 print(f"S0 nuclei without XYZ coordinates saved to {no_xyz_output_csv_path_s0}")
 
 
-
-#%% 
-
-
-
-
-
-
-#TODO Output needs testing OLD but WORKING
-# Input: Segmented EM nuclei (S0 or s4) and skeleton root nodes S0 or S4 (not transformed == raw Catmaid output from previous code block)
-# Output: Centroid (EM nuclei) and root node coordinates that overlap in nuclei segmentation
-
-#Load the segmented 3D nuclei TIFF file.
-#Load the CSV with xyz coordinates.
-#Calculate the centroids of each segmented nucleus.
-#Assign the closest xyz coordinate to each centroid.
-#Save the segmented nuclei that do not have a corresponding xyz separately.
-#Save the results in a new CSV file with both centroid and xyz information.
-
-import numpy as np
-import pandas as pd
-from scipy.spatial import KDTree
-from tqdm import tqdm
-
-# Threshold distance in micrometers for all three axis
-THRESHOLD_DISTANCE_MICROMETERS = 8 #A djust the output filename
-
-# Paths to the input files
-
-# S4 resolution
-centroids_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/centroids_brain-only_z-450.csv'  # in um
-xyz_coordinates_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S4-skeleton_coordinates_soma.csv'  # in um
-
-# Path to save the output files
-# S4 resolution
-output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-output_centroids_and_coords_threshold_8um.csv'
-no_xyz_output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-nuclei_without_xyz_threshold_8um.csv'
-
-# Load the centroids CSV file
-centroids_df = pd.read_csv(centroids_csv_path)
-# Rename columns for clarity
-centroids_df.rename(columns={'x': 'centroid_x', 'y': 'centroid_y', 'z': 'centroid_z'}, inplace=True)
-
-# Load the XYZ coordinates
-xyz_coordinates = pd.read_csv(xyz_coordinates_path)
-
-# Define the subset of columns you want to keep
-desired_columns = ['skeleton_id', 'x_s4', 'y_s4', 'z_s4']
-
-# Create a new dataframe with only the desired columns
-xyz_coordinates = xyz_coordinates[desired_columns]
-
-# Ensure coordinates are floats
-coordinates = xyz_coordinates[['x_s4', 'y_s4', 'z_s4']].values
-
-# Ensure centroids are floats and get their values
-centroids = centroids_df[['centroid_z', 'centroid_y', 'centroid_x']].values
-
-# Build a KDTree for the coordinates in micrometers
-kdtree = KDTree(coordinates)
-
-# Find the closest XYZ coordinate for each centroid within the threshold distance
-closest_coords = []
-no_xyz_coords = []
-
-for centroid_idx, centroid in tqdm(enumerate(centroids), desc='Assigning closest coordinates', total=len(centroids)):
-    # Query the KDTree for points within threshold distance along all axes
-    closest_indices = kdtree.query_ball_point(centroid, THRESHOLD_DISTANCE_MICROMETERS, p=2)
-    
-    if closest_indices:
-        for idx in closest_indices:
-            closest_coord = coordinates[idx]
-            closest_coords.append([xyz_coordinates.iloc[idx]['skeleton_id'], *centroid, *closest_coord])
-            
-        # Mark all found XYZ coordinates as used
-        coordinates[closest_indices] = np.inf
-    
-# Create DataFrames for the results
-columns = ['skeleton_id', 'centroid_z', 'centroid_y', 'centroid_x', 'x_s4', 'y_s4', 'z_s4']
-output_df = pd.DataFrame(closest_coords, columns=columns)
-
-# Filter out rows where x_s4, y_s4, z_s4 are inf (indicating no corresponding XYZ found within threshold)
-no_xyz_df = pd.DataFrame(coordinates[~np.isinf(coordinates).any(axis=1)], columns=['x_s4', 'y_s4', 'z_s4'])
-
-# Save the results to CSV files
-output_df.to_csv(output_csv_path, index=False)
-no_xyz_df.to_csv(no_xyz_output_csv_path, index=False)
-
-print(f"Merged output saved to {output_csv_path}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #%%
-#TODO
-# Fix the measurements_klb-raw_data.csv from large_scale.py that it can be used
-
-#CSV1: Contains rows of floating-point values with headers x, y, z. (output from previous block)
-#CSV2: Contains headers formatted as "x::y::z" strings and rows of data, but the order of columns in CSV2 does not correspond to the order of rows in CSV1.
-
-#Match the columns in CSV2 to the rows in CSV1 based on the headers of CSV2.
-#Rearrange CSV2 columns so that they align with the rows in CSV1.
+# Concatenated csv of the EM-centroid_transforned to LM and centroid coordinate_s4-s0
+# Rename columns if necessary
 
 import pandas as pd
 
-# Paths to the files
-csv1_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/output_ID-name-coordinates.csv'
-csv2_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks-dff_long-slidingWindow.csv'
+# Paths to the input CSV files
+file1_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/transformed_LM-points-brain-only_z-450_um.csv'
+file2_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S4-S0-centroids_brain-only_z-450_um.csv'
 
-# Load CSV1
-csv1_df = pd.read_csv(csv1_path)
+# Load the input CSV files
+LM_space = pd.read_csv(file1_path)
+EM_space = pd.read_csv(file2_path)
 
-# Load CSV2
-csv2_df = pd.read_csv(csv2_path)
+# Rename headers 
+LM_space.rename(columns={'x': 'x_LM', 'y': 'y_LM', 'z': 'z_LM'}, inplace=True)
 
-# Display the headers of CSV2
-print(f"Headers of CSV2: {csv2_df.columns.tolist()}")
 
-# Parse and clean the headers of CSV2
-csv2_headers = csv2_df.columns.tolist()
-cleaned_headers = [header.strip().strip('"') for header in csv2_headers if header != 'timepoint']
-parsed_headers = [tuple(map(float, header.split('::'))) for header in cleaned_headers]
+# Concatenate the DataFrames along columns
+concatenated_df = pd.concat([LM_space, EM_space], axis=1)
 
-# Create a DataFrame from parsed headers
-headers_df = pd.DataFrame(parsed_headers, columns=['x', 'y', 'z'])
+# Display the concatenated DataFrame
+print(concatenated_df)
 
-# Merge CSV1 and headers_df to get the matching order
-csv1_with_headers = csv1_df.reset_index().merge(headers_df, on=['x', 'y', 'z']).set_index('index')
-matching_order = csv1_with_headers.index
+# Save the concatenated DataFrame to a new CSV file
+output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/LM_EM_space_centroids_um.csv'
+concatenated_df.to_csv(output_csv_path, index=False)
 
-# Include the 'timepoint' column and reorder CSV2 columns based on the matching order
-reordered_columns = ['timepoint'] + [csv2_headers[i+1] for i in matching_order]  # +1 because 'timepoint' is the first column
-reordered_csv2_df = csv2_df[reordered_columns]
+print(f"Concatenated output saved to {output_csv_path}")
 
-# Save the reordered CSV2
-reordered_csv2_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/reordered_csv2.csv'
-reordered_csv2_df.to_csv(reordered_csv2_path, index=False)
+# %%
+# Input /Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/
+# LM_EM_space_centroids_um.csv
 
-print(f"Reordered CSV2 saved to {reordered_csv2_path}")
+# add index in the format x_LM::y_LM::z_LM, where x_LM, y_LM, z_LM are the floating poinnts of the respected column names
+
+import pandas as pd
+
+# Path to your input CSV file
+input_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/LM_EM_space_centroids_um.csv'
+
+# Read the CSV file into a DataFrame
+df = pd.read_csv(input_csv_path)
+
+# Ensure all columns are treated as floats (if necessary)
+#df = df.astype(float)  # Uncomment if columns are not already floats
+
+# Define the columns to use for the index
+index_columns = ['x_LM', 'y_LM', 'z_LM']  
+
+# Create the index column formatted as x_LM::y_LM::z_LM
+df['index'] = df[index_columns].astype(str).apply('::'.join, axis=1)
+
+# Reorder columns with the new index column as the first column
+columns = ['index'] + df.columns.drop('index').tolist()
+df = df[columns]
+
+# Print the DataFrame to verify the changes
+print(df)
+
+# Save the modified DataFrame back to a CSV file
+output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/LM_EM_space_centroids_um_INDEX.csv'
+df.to_csv(output_csv_path, index=False)
+
+print(f"DataFrame with index saved to {output_csv_path}")
 
 # %%
