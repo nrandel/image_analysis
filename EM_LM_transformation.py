@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 # Path to the input file
 input_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/skeleton_coordinates.csv'
-output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/skeleton_coordinates_soma.csv'
+output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S0-skeleton_coordinates_soma.csv'
 
 # Load the input CSV file
 df = pd.read_csv(input_csv_path)
@@ -25,18 +25,29 @@ df.rename(columns={' skeleton_id': 'skeleton_id', ' r': 'r', ' x': 'x', ' y': 'y
 # Find the row with the largest 'r' value for each 'skeleton_id'
 result_df = df.loc[df.groupby('skeleton_id')['r'].idxmax()]
 
+# Sort the DataFrame by column 'r' in descending order
+result_df = df.sort_values(by='r', ascending=False)
+
+# Loop through the rows and drop rows where column 'C' is 0
+rows_to_drop = []
+for index, row in result_df.iterrows():
+    if row['r'] == 0:
+        rows_to_drop.append(index)
+
+filtered_df = result_df.drop(rows_to_drop)
+
 # Remove the 'r' columns
-df = df.drop(columns=['r'])
+filtered_df = filtered_df.drop(columns=['r'])
 
 # Save the resulting dataframe to a new CSV file
-result_df.to_csv(output_csv_path, index=False)
+filtered_df.to_csv(output_csv_path, index=False)
 
 print(f"Processed output saved to {output_csv_path}")
 
 #%%
 
-# Test input 3D tif file with segmented areas, csv with xyz coordinates.
-#output all segmented areas that overlap with a xyz coordinate
+# Input 3D tif file with segmented areas, csv with xyz coordinates.
+# Output all segmented areas that overlap with a xyz coordinate
 
 import numpy as np
 import pandas as pd
