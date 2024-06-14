@@ -237,12 +237,10 @@ print(df2_headers.columns.tolist())
 df1 = pd.read_csv(csv1_path)
 df2 = pd.read_csv(csv2_path)
 
-# Adding an empty column named 'sleleton_id' with None values to df1
+# Adding an empty column named 'skeleton_id' with None values to df1
 df1['skeleton_id'] = None
 
-
 # Rename the headers as needed
-# Adjust the renaming dictionaries according to your actual column names
 rename_dict1 = {
     'x_LM': 'x_LM', 
     'y_LM': 'y_LM',
@@ -253,8 +251,7 @@ rename_dict1 = {
     'x_s0': 'x_s0', 
     'y_s0': 'y_s0',
     'z_s0': 'z_s0',
-    'skeleton_id': 'skeleton_id'
-    
+    'skeleton_id': 'skeleton_id'   
 }
 
 rename_dict2 = {
@@ -263,13 +260,11 @@ rename_dict2 = {
     'centroid_z_s0': 'z_s0',
     'centroid_x_s4': 'x_s4', 
     'centroid_y_s4': 'y_s4',
-    'centroid_z_s4': 'z_z4',
+    'centroid_z_s4': 'z_s4',
     'skeleton_id': 'skeleton_id'
 }
 
-
-# Rename columns
-df1.rename(columns=rename_dict1, inplace=True)
+# Rename columns in df2
 df2.rename(columns=rename_dict2, inplace=True)
 
 # Print the headers after renaming
@@ -279,10 +274,8 @@ print(df1.columns.tolist())
 print("\nHeaders of CSV 2 after renaming:")
 print(df2.columns.tolist())
 
-
-
 # Check if the renamed columns exist in both DataFrames
-merge_columns = ['x_s0', 'y_s0', 'z_s0', 'x_s4', 'y_s4', 'z_s4']
+merge_columns = ['x_s0', 'y_s0', 'z_s0']  # Adjust merge columns based on available columns in both DataFrames
 
 # Check if merge columns exist in both DataFrames
 missing_columns_df1 = [col for col in merge_columns if col not in df1.columns]
@@ -310,7 +303,6 @@ if not missing_columns_df1 and not missing_columns_df2:
     print(f"Merged DataFrame saved to {output_csv_path}")
 else:
     print("Merge operation aborted due to missing columns.")
-
 
 
 # %%
