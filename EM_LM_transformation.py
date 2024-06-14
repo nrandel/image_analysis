@@ -179,10 +179,9 @@ concatenated_df.to_csv(output_csv_path, index=False)
 print(f"Concatenated output saved to {output_csv_path}")
 
 # %%
+# Add index in the format x_LM::y_LM::z_LM, where x_LM, y_LM, z_LM are the floating poinnts of the respected column names
 # Input /Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/
 # LM_EM_space_centroids_um.csv
-
-# add index in the format x_LM::y_LM::z_LM, where x_LM, y_LM, z_LM are the floating poinnts of the respected column names
 
 import pandas as pd
 
@@ -193,13 +192,13 @@ input_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/LM_EM_space_ce
 df = pd.read_csv(input_csv_path)
 
 # Ensure all columns are treated as floats (if necessary)
-#df = df.astype(float)  # Uncomment if columns are not already floats
+# df = df.astype(float)  # Uncomment if columns are not already floats
 
 # Define the columns to use for the index
-index_columns = ['x_LM', 'y_LM', 'z_LM']  
+index_columns = ['x_LM', 'y_LM', 'z_LM']  # Replace with actual column names
 
-# Create the index column formatted as x_LM::y_LM::z_LM
-df['index'] = df[index_columns].astype(str).apply('::'.join, axis=1)
+# Create the index column formatted as x_LM::y_LM::z_LM with 6 decimal places
+df['index'] = df[index_columns].apply(lambda row: '::'.join(f"{value:.6f}" for value in row), axis=1)
 
 # Reorder columns with the new index column as the first column
 columns = ['index'] + df.columns.drop('index').tolist()
@@ -213,5 +212,105 @@ output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/LM_EM_space_c
 df.to_csv(output_csv_path, index=False)
 
 print(f"DataFrame with index saved to {output_csv_path}")
+
+# %%
+# Add skeleton-id to LM_EM_space_centroids_um_INDEX, if no match == NA
+
+import pandas as pd
+
+# Paths to your input CSV files
+csv1_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/LM_EM_space_centroids_um_INDEX.csv'
+csv2_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s0-output_centroids_and_coords_threshold_S0-2um.csv'
+
+# Read only the headers of the CSV files
+df1_headers = pd.read_csv(csv1_path, nrows=0)
+df2_headers = pd.read_csv(csv2_path, nrows=0)
+
+# Print the headers
+print("Headers of CSV 1:")
+print(df1_headers.columns.tolist())
+
+print("\nHeaders of CSV 2:")
+print(df2_headers.columns.tolist())
+
+# Load the CSV files into DataFrames
+df1 = pd.read_csv(csv1_path)
+df2 = pd.read_csv(csv2_path)
+
+# Adding an empty column named 'sleleton_id' with None values to df1
+df1['skeleton_id'] = None
+
+
+# Rename the headers as needed
+# Adjust the renaming dictionaries according to your actual column names
+rename_dict1 = {
+    'x_LM': 'x_LM', 
+    'y_LM': 'y_LM',
+    'z_LM': 'z_LM',
+    'x_s4': 'x_s4', 
+    'y_s4': 'y_s4',
+    'z_s4': 'z_s4',
+    'x_s0': 'x_s0', 
+    'y_s0': 'y_s0',
+    'z_s0': 'z_s0',
+    'skeleton_id': 'skeleton_id'
+    
+}
+
+rename_dict2 = {
+    'centroid_x_s0': 'x_s0', 
+    'centroid_y_s0': 'y_s0',
+    'centroid_z_s0': 'z_s0',
+    'centroid_x_s4': 'x_s4', 
+    'centroid_y_s4': 'y_s4',
+    'centroid_z_s4': 'z_z4',
+    'skeleton_id': 'skeleton_id'
+}
+
+
+# Rename columns
+df1.rename(columns=rename_dict1, inplace=True)
+df2.rename(columns=rename_dict2, inplace=True)
+
+# Print the headers after renaming
+print("\nHeaders of CSV 1 after renaming:")
+print(df1.columns.tolist())
+
+print("\nHeaders of CSV 2 after renaming:")
+print(df2.columns.tolist())
+
+
+
+# Check if the renamed columns exist in both DataFrames
+merge_columns = ['x_s0', 'y_s0', 'z_s0', 'x_s4', 'y_s4', 'z_s4']
+
+# Check if merge columns exist in both DataFrames
+missing_columns_df1 = [col for col in merge_columns if col not in df1.columns]
+missing_columns_df2 = [col for col in merge_columns if col not in df2.columns]
+
+if missing_columns_df1:
+    print(f"Missing columns in df1: {missing_columns_df1}")
+if missing_columns_df2:
+    print(f"Missing columns in df2: {missing_columns_df2}")
+
+# Proceed with merge only if all specified columns exist in both DataFrames
+if not missing_columns_df1 and not missing_columns_df2:
+    # Merge the DataFrames on the specified columns, keeping all rows
+    merged_df = pd.merge(df1, df2, on=merge_columns, how='outer', suffixes=('_csv1', '_csv2'))
+
+    # Print the merged DataFrame to verify the changes
+    print(merged_df)
+
+    # Path to save the merged CSV file
+    output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/LM_EM_space_centroids_skeleton_id_um_INDEX.csv'
+
+    # Save the merged DataFrame to a CSV file
+    merged_df.to_csv(output_csv_path, index=False)
+
+    print(f"Merged DataFrame saved to {output_csv_path}")
+else:
+    print("Merge operation aborted due to missing columns.")
+
+
 
 # %%
