@@ -48,51 +48,115 @@ print(f"Processed output saved to {output_csv_path}")
 
 
 #%%
-
-# Input 3D tif file with segmented areas, csv with xyz coordinates.
-# Output all segmented areas that overlap with a xyz coordinate
-
+# Test 
 import numpy as np
 import pandas as pd
-import tifffile
+from scipy.spatial import KDTree
+from tqdm import tqdm
 
-# Step 1: Load and Process the 3D TIFF File (Segmented Areas)
-def load_tiff_stack(tiff_file):
-    return tifffile.imread(tiff_file)
+# Threshold distance in micrometers for all three axes
+# Note: To transform from s0 to s4, the scale levels (the s0, s1, s2, ...) are powers of two. 
+# s4 means pow(2, 4) = 16, which means 1/16th. --> s4 = s0/16
 
-segmented_tiff_file = '/path/to/segmented_areas.tif'
-segmented_areas = load_tiff_stack(segmented_tiff_file)
+# Threshold distance in micrometers for s0 and s4
+# adjust in filenames, take transformation into account
+THRESHOLD_DISTANCE_MICROMETERS_S0 = 2
+THRESHOLD_DISTANCE_MICROMETERS_S4 = THRESHOLD_DISTANCE_MICROMETERS_S0 / 16
 
-# Step 2: Load XYZ Coordinates from CSV
-csv_file = '/path/to/xyz_coordinates.csv'
-xyz_data = pd.read_csv(csv_file)
+# Paths to the input files
+centroids_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S4-S0-centroids_brain-only_z-450_um.csv'  # in um
+xyz_coordinates_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S4-S0-skeleton_coordinates_soma_um.csv'  # in um
 
-# Step 3: Identify Segmented Areas Overlapping with XYZ Coordinates
-overlapping_segments = []
+# Path to save the output files
+output_csv_path_s4 = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-output_centroids_and_coords_threshold_S0-2um.csv'
+no_xyz_output_csv_path_s4 = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s4-nuclei_without_xyz_threshold_S0-2um.csv'
 
-for index, row in xyz_data.iterrows():
-    x, y, z = int(row['x']), int(row['y']), int(row['z'])
-    
-    # Check if the coordinates are within the segmented areas
-    if 0 <= x < segmented_areas.shape[0] and 0 <= y < segmented_areas.shape[1] and 0 <= z < segmented_areas.shape[2]:
-        if segmented_areas[x, y, z] == 1:  # Assuming segmented areas are marked as 1 in the TIFF stack
-            overlapping_segments.append((x, y, z))
+output_csv_path_s0 = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s0-output_centroids_and_coords_threshold_S0-2um.csv'
+no_xyz_output_csv_path_s0 = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/s0-nuclei_without_xyz_threshold_S0-2um.csv'
 
-# Step 4: Output the Results
-print("Overlapping Segmented Areas:")
-for segment in overlapping_segments:
-    print(f"Segmented Area at (x={segment[0]}, y={segment[1]}, z={segment[2]})")
+# Load the centroids CSV file
+centroids_df = pd.read_csv(centroids_csv_path) 
 
+# Rename columns for clarity
+centroids_df.rename(columns={
+    'x_s4': 'centroid_x_s4', 'y_s4': 'centroid_y_s4', 'z_s4': 'centroid_z_s4',
+    'x_s0': 'centroid_x_s0', 'y_s0': 'centroid_y_s0', 'z_s0': 'centroid_z_s0'
+}, inplace=True)
 
+# Load the XYZ coordinates
+xyz_coordinates = pd.read_csv(xyz_coordinates_path)
 
+# Define the subset of columns for S4 and S0
+desired_columns_s4 = ['skeleton_id', 'x_s4', 'y_s4', 'z_s4']
+desired_columns_s0 = ['skeleton_id', 'x_s0', 'y_s0', 'z_s0']
+desired_centroids_s4 = ['centroid_x_s4', 'centroid_y_s4', 'centroid_z_s4']
+desired_centroids_s0 = ['centroid_x_s0', 'centroid_y_s0', 'centroid_z_s0']
 
+# Create new DataFrames with only the desired columns
+xyz_coordinates_s4 = xyz_coordinates[desired_columns_s4].dropna()
+xyz_coordinates_s0 = xyz_coordinates[desired_columns_s0].dropna()
+centroids_df_s4 = centroids_df[desired_centroids_s4].dropna()
+centroids_df_s0 = centroids_df[desired_centroids_s0].dropna()
 
+# Function to find closest coordinates using KDTree
+def find_closest_coordinates(xyz_coords, centroids, threshold, skeleton_id_col):
+    kdtree = KDTree(xyz_coords[['x', 'y', 'z']])
+    closest_coords = []
+    for centroid in tqdm(centroids.values, desc='Assigning closest coordinates', total=len(centroids)):
+        closest_indices = kdtree.query_ball_point(centroid, threshold, p=2)
+        if closest_indices:
+            for idx in closest_indices:
+                closest_coord = xyz_coords.iloc[idx]
+                closest_coords.append([closest_coord[skeleton_id_col], *centroid, *closest_coord[['x', 'y', 'z']].values])
+            xyz_coords.iloc[closest_indices, xyz_coords.columns.get_loc('x'):xyz_coords.columns.get_loc('z')+1] = np.inf  # Mark all found XYZ coordinates as used
+    return closest_coords, xyz_coords[~np.isinf(xyz_coords[['x', 'y', 'z']]).any(axis=1)]
 
+# Adjust the column names for KDTree
+xyz_coordinates_s4.rename(columns={'x_s4': 'x', 'y_s4': 'y', 'z_s4': 'z'}, inplace=True)
+xyz_coordinates_s0.rename(columns={'x_s0': 'x', 'y_s0': 'y', 'z_s0': 'z'}, inplace=True)
+
+# Find closest coordinates for S4
+closest_coords_s4, remaining_coords_s4 = find_closest_coordinates(
+    xyz_coordinates_s4, centroids_df_s4, THRESHOLD_DISTANCE_MICROMETERS_S4, 'skeleton_id'
+)
+
+# Create DataFrames for the results for S4
+columns_s4 = ['skeleton_id', 'centroid_x_s4', 'centroid_y_s4', 'centroid_z_s4', 'x', 'y', 'z']
+output_df_s4 = pd.DataFrame(closest_coords_s4, columns=columns_s4)
+
+# Save the results to CSV files for S4
+output_df_s4.to_csv(output_csv_path_s4, index=False)
+remaining_coords_s4.to_csv(no_xyz_output_csv_path_s4, index=False, columns=['skeleton_id', 'x', 'y', 'z'])
+
+print(f"S4 merged output saved to {output_csv_path_s4}")
+print(f"S4 nuclei without XYZ coordinates saved to {no_xyz_output_csv_path_s4}")
+
+# Find closest coordinates for S0
+closest_coords_s0, remaining_coords_s0 = find_closest_coordinates(
+    xyz_coordinates_s0, centroids_df_s0, THRESHOLD_DISTANCE_MICROMETERS_S0, 'skeleton_id'
+)
+
+# Create DataFrames for the results for S0
+columns_s0 = ['skeleton_id', 'centroid_x_s0', 'centroid_y_s0', 'centroid_z_s0', 'x', 'y', 'z']
+output_df_s0 = pd.DataFrame(closest_coords_s0, columns=columns_s0)
+
+# Save the results to CSV files for S0
+output_df_s0.to_csv(output_csv_path_s0, index=False)
+remaining_coords_s0.to_csv(no_xyz_output_csv_path_s0, index=False, columns=['skeleton_id', 'x', 'y', 'z'])
+
+print(f"S0 merged output saved to {output_csv_path_s0}")
+print(f"S0 nuclei without XYZ coordinates saved to {no_xyz_output_csv_path_s0}")
 
 
 
 #%% 
-#TODO Output needs testing
+
+
+
+
+
+
+#TODO Output needs testing OLD but WORKING
 # Input: Segmented EM nuclei (S0 or s4) and skeleton root nodes S0 or S4 (not transformed == raw Catmaid output from previous code block)
 # Output: Centroid (EM nuclei) and root node coordinates that overlap in nuclei segmentation
 
@@ -109,7 +173,7 @@ from scipy.spatial import KDTree
 from tqdm import tqdm
 
 # Threshold distance in micrometers for all three axis
-THRESHOLD_DISTANCE_MICROMETERS = 8
+THRESHOLD_DISTANCE_MICROMETERS = 8 #A djust the output filename
 
 # Paths to the input files
 
@@ -195,168 +259,6 @@ print(f"Merged output saved to {output_csv_path}")
 
 
 
-
-#%%
-# TODO Not working because the rows df1 are not df2 the same!!
-# Concatenate EM centroid s4 with transformed LM s4 
-# Change transformed LM s0! from nm to um
-
-import pandas as pd
-
-# Load the CSV files
-file1_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/centroids_brain-only_z-450.csv'
-file2_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/S4-skeleton_coordinates_soma.csv'
-
-df1 = pd.read_csv(file1_path)
-df2 = pd.read_csv(file2_path)
-
-# Rename headers for df1
-df1.rename(columns={'x': 'centroid_x_s4', 'y': 'centroid_y_s4', 'z': 'centroid_z_s4'}, inplace=True)
-
-# Inspect the first few rows to determine the correct index column
-print("File 1 headers:", df1.columns)
-print("File 2 headers:", df2.columns)
-print("File 1 preview:\n", df1.head())
-print("File 2 preview:\n", df2.head())
-
-# Convert df2 coordinates from nanometers to microns
-df2[['x_s0', 'y_s0', 'z_s0']] = df2[['x_s0', 'y_s0', 'z_s0']] / 1000.0
-
-
-
-# Concatenate the DataFrames side by side
-concatenated_df = pd.concat([df1, df2], axis=1)
-
-# Save the concatenated DataFrame to a new CSV file
-concatenated_file_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/Concatenate-S4-centroid_skeleton_coordinates.csv'
-concatenated_df.to_csv(concatenated_file_path, index=False)
-
-print("Concatenated data saved to 'Concatenate-S4-centroid_skeleton_coordinates.csv''")
-
-
-
-
-
-# %%
-#TODO
-
-# Inout csv: activtiy & concatenated file with skeleton id and centroid xyz
-# Output: act
-
-# Import
-import pandas as pd
-
-# Paths to the files
-output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/output_centroids_and_coords.csv'
-second_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/skeleton_coordinates.csv'
-
-# Load the output_df from the previous script
-output_df = pd.read_csv(output_csv_path)
-
-# Load the second CSV file
-second_df = pd.read_csv(second_csv_path)
-
-# Display the headers of the second CSV file to understand the current column names
-print(f"Headers of the second CSV file: {second_df.columns.tolist()}")
-
-# Identify the expected common columns for matching
-common_columns = ['x', 'y', 'z']
-
-# Mapping of old headers to new headers if necessary
-# Replace 'old_x_header', 'old_y_header', and 'old_z_header' with actual column names in the second CSV file
-header_mapping = {
-    ' x': 'x',
-    ' y': 'y',
-    ' z': 'z'
-}
-
-# Rename headers of the second CSV to ensure they match the output_df headers
-second_df.rename(columns=header_mapping, inplace=True)
-
-# Ensure common columns exist
-common_columns = ['x', 'y', 'z']
-for column in common_columns:
-    if column not in output_df.columns or column not in second_df.columns:
-        raise ValueError(f"Column '{column}' not found in both dataframes")
-
-
-# Adjust scale of x,y,z values
-
-
-
-
-
-
-# Merge based on common columns
-merged_df = pd.merge(output_df, second_df, on=common_columns, how='inner')
-
-# Discard extra rows in second_df
-second_df_subset = second_df[second_df[common_columns].isin(output_df[common_columns]).all(axis=1)]
-
-# Save the merged dataframe to a new CSV file
-merged_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/merged_output.csv'
-merged_df.to_csv(merged_csv_path, index=False)
-
-# Save the subset of second_df to a new CSV file
-#subset_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/subset_second_df_output.csv'
-#second_df_subset.to_csv(subset_csv_path, index=False)
-
-print(f"Merged output saved to {merged_csv_path}")
-#print(f"Subset of second_df saved to {subset_csv_path}")
-
-
-
-#%% Test if csv output has no data
-
-print(f"Number of rows in merged dataframe: {len(merged_df)}")
-
-print(f"Common columns in output_df: {common_columns}")
-print(f"Columns in output_df: {output_df.columns}")
-print(f"Columns in second_df: {second_df.columns}")
-
-print(f"Number of rows in output_df: {len(output_df)}")
-print(f"Number of rows in second_df: {len(second_df)}")
-
-
-
-#%%
-#TODO
-# Input: merged_output (previous code block) & skeleton_names
-# Output: EM centroid, xyz coordinates, skeleton id, neuron name
-
-# Import
-import numpy as np
-import pandas as pd
-
-# Paths to the files
-output_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/merged_output.csv'
-second_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/skeleton_names.csv'
-
-# Load the output_df from the previous script
-output_df = pd.read_csv(output_csv_path)
-
-# Load the second CSV file
-second_df = pd.read_csv(second_csv_path)
-
-# Display the headers of the second CSV file to understand the current column names
-print(f"Headers of the second CSV file: {second_df.columns.tolist()}")
-
-# Identify the expected common columns for matching
-common_columns = ['skeleton_id']
-
-# Ensure the common columns exist in both dataframes after renaming
-for column in common_columns:
-    if column not in output_df.columns or column not in second_df.columns:
-        raise ValueError(f"Column '{column}' not found in both dataframes")
-
-# Merge the dataframes on the common columns
-merged_df = pd.merge(output_df, second_df, on=common_columns, how='inner')
-
-# Save the merged dataframe to a new CSV file
-merged_csv_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/test/output_ID-name-coordinates.csv'
-merged_df.to_csv(merged_csv_path, index=False)
-
-print(f"Merged output saved to {merged_csv_path}")
 
 #%%
 #TODO
