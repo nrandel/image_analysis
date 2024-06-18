@@ -233,12 +233,12 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# plot fot sigle cell ca-imaging
+# plot fot single cell ca-imaging
 import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read the CSV file into a DataFrame
-file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/measurements/3_1_20240306_155600.measurements.csv'
+file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/measurements/a_4245_5_20240427_115946.measurements.csv'
 single_cell_activity = pd.read_csv(file_path)
 
 # Remove all columns except activity traces (assuming 'timepoint' is the only non-activity trace column)
@@ -261,7 +261,7 @@ end_index = single_cell_activity.index.max()
 selected_data = single_cell_activity.loc[start_index:end_index]
 
 # Create the figure and set the size
-fig, ax = plt.subplots(figsize=(200, 10))  # Set the plot size (width, height in inches)
+fig, ax = plt.subplots(figsize=(200, 10))  # Set the plot size (width, height in inches) 200, 300
 
 # Plot the selected data
 selected_data.plot(kind='line', ax=ax)
@@ -269,7 +269,7 @@ selected_data.plot(kind='line', ax=ax)
 # Set the labels and title
 ax.set_xlabel('Index')
 ax.set_ylabel('Activity')
-ax.set_title('CP4 8-ab 3_1')
+ax.set_title('MB2ON_3-5')
 
 # Set the x-axis label tick interval to 1
 #ax.set_xticks(range(start_index, end_index + 1))
