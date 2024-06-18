@@ -46,7 +46,7 @@ print(f"Index values:\n{df.index}\n")
 print(f"Columns in DataFrame:\n{df.columns}\n")
 
 # Plot every 20 columns against the index with specified x-axis range
-plot_columns_in_chunks(df, chunk_size=20, x_start=x_start, x_end=x_end)
+plot_columns_in_chunks(df, chunk_size=5, x_start=x_start, x_end=x_end)
 
 
 # %%
