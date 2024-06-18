@@ -17,7 +17,7 @@ import os
 # dff long sliding window 1099
 #dff_long = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks-dff_long-slidingWindow.csv')
 
-#stimulus window 101-106
+#stimulus window 101-106/ 681-695
 #%%
 #calculate cell specific dff from raw fluorescence
 #TODO
@@ -45,8 +45,9 @@ df = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data
 # Drop the 'timepoint' column and use the index as the new timepoint
 df.drop(columns=['timepoint'], inplace=True)
 
-# Define the time window (102-117, inclusive). Stimulus window 101-106
-time_window = list(range(102, 117))
+# Define the time window (102-110, 682, 699 inclusive). Stimulus window 101-106/ 681-695
+# Used to define neurons that respond to stimulus. Time window for plotting below
+time_window = list(range(682, 699))
 
 # Extract the relevant rows for the time window using the index as timepoint
 time_window_data = df.iloc[time_window]
@@ -101,11 +102,11 @@ print(non_responsive_neurons)
 save_dir = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/'
 
 # Save neurons to CSV files with specified path
-save_neurons_to_csv(responsive_neurons_peak, "responsive_neurons_peak.csv", path=save_dir)
-save_neurons_to_csv(responsive_neurons_average, "responsive_neurons_average.csv", path=save_dir)
-save_neurons_to_csv(difference_neurons, "difference_neurons.csv", path=save_dir)
-save_neurons_to_csv(responsive_neurons_intersection, "responsive_neurons_intersection.csv", path=save_dir)
-save_neurons_to_csv(non_responsive_neurons, "non_responsive_neurons.csv", path=save_dir)
+save_neurons_to_csv(responsive_neurons_peak, "responsive_neurons_peak_682-699.csv", path=save_dir)
+save_neurons_to_csv(responsive_neurons_average, "responsive_neurons_average_682-699.csv", path=save_dir)
+save_neurons_to_csv(difference_neurons, "difference_neurons_682-699.csv", path=save_dir)
+save_neurons_to_csv(responsive_neurons_intersection, "responsive_neurons_intersectio_682-699.csv", path=save_dir)
+save_neurons_to_csv(non_responsive_neurons, "non_responsive_neurons_682-699.csv", path=save_dir)
 
 # Save the original CSV file with only the columns corresponding to the responsive neurons
 df_responsive_neurons_peak = df[list(responsive_neurons_peak.index)]
@@ -114,13 +115,14 @@ df_difference_neurons = df[list(difference_neurons)]
 df_responsive_neurons_intersection = df[list(responsive_neurons_intersection)]
 df_non_responsive_neurons = df[list(non_responsive_neurons)]
 
-df_responsive_neurons_peak.to_csv(os.path.join(save_dir, "activity_of_responsive_neurons_peak.csv"), index=False)
-df_responsive_neurons_average.to_csv(os.path.join(save_dir, "activity_of_responsive_neurons_average.csv"), index=False)
-df_difference_neurons.to_csv(os.path.join(save_dir, "activity_of_difference_neurons.csv"), index=False)
-df_responsive_neurons_intersection.to_csv(os.path.join(save_dir, "activity_of_responsive_neurons_intersection.csv"), index=False)
-df_non_responsive_neurons.to_csv(os.path.join(save_dir, "activity_of_non_responsive_neurons.csv"), index=False)
-# Define start and end times for plotting 
-# Note: stimulus window 101-106
+df_responsive_neurons_peak.to_csv(os.path.join(save_dir, "activity_of_responsive_neurons_peak_682-699.csv"), index=False)
+df_responsive_neurons_average.to_csv(os.path.join(save_dir, "activity_of_responsive_neurons_average_682-699.csv"), index=False)
+df_difference_neurons.to_csv(os.path.join(save_dir, "activity_of_difference_neurons_682-699.csv"), index=False)
+df_responsive_neurons_intersection.to_csv(os.path.join(save_dir, "activity_of_responsive_neurons_intersection_682-699.csv"), index=False)
+df_non_responsive_neurons.to_csv(os.path.join(save_dir, "activity_of_non_responsive_neurons_682-699.csv"), index=False)
+
+# Define start and end times for plotting 80-150/ 660-740
+# Note: stimulus window 101-106/ 681-695
 start_time = 80
 end_time = 150
 time_range = (start_time, end_time)
@@ -132,3 +134,83 @@ plot_neuron_activity(df, responsive_neurons_intersection, time_range, 'Neurons r
 #plot_neuron_activity(df, non_responsive_neurons, time_range, 'Neurons not responsive for both peak and average ΔF/F') #For now to many datapoints to plot
 
 #%%
+# Find intersection between neurons that respond to first and sec stimulus
+# Save csv
+
+import pandas as pd
+
+# Load the two CSV files
+df1 = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/responsive_neurons_average_102-110.csv', header=None)
+df2 = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/responsive_neurons_average_682-699.csv', header=None)
+
+# Extract the first column from each dataframe
+df1_first_col = df1[[0]]
+df2_first_col = df2[[0]]
+
+# Find the intersection of the first columns
+intersection = pd.merge(df1_first_col, df2_first_col, how='inner')
+
+# Add a header to the intersection dataframe
+intersection.columns = ['cell coordinates']
+
+# Save the result to a new CSV file
+intersection.to_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/intersection_responsive_neurons_average_102-110-AND-682-699.csv', index=False)
+
+print("Intersection saved to output.csv")
+
+
+
+#%%
+# Find cells (intersection) in activity traces and plot
+# csv2 '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/intersection_responsive_neurons_average_102-110-AND-682-699.csv'
+# dataset '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks-dff_long-slidingWindow.csv')
+
+import pandas as pd
+import os
+import matplotlib.pyplot as plt
+
+def plot_neuron_activity(df, neurons, time_range, title, show_legend=True):
+    plt.figure(figsize=(12, 8))
+    for neuron in neurons:
+        plt.plot(df.index[time_range[0]:time_range[1]+1], df[neuron][time_range[0]:time_range[1]+1], label=neuron)
+    plt.title(title)
+    plt.xlabel('Timepoint')
+    plt.ylabel('ΔF/F')
+    if show_legend:
+        plt.legend(loc='upper right', fontsize='small')
+    plt.grid(True)
+    plt.show()
+
+def save_neurons_to_csv(neurons, filename, path=''):
+    filepath = os.path.join(path, filename)
+    pd.DataFrame(neurons).to_csv(filepath, header=False)
+
+# Load the dataset from the CSV file
+df = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks-dff_long-slidingWindow.csv')
+
+# Drop the 'timepoint' column and use the index as the new timepoint
+df.drop(columns=['timepoint'], inplace=True)
+
+# Load the second CSV file to find the intersection
+intersection_df = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/intersection_responsive_neurons_average_102-110-AND-682-699.csv')
+
+# Assuming that 'intersection_df' contains the responsive neuron identifiers in the first column
+responsive_neurons_new_csv = intersection_df.iloc[:, 0].values
+
+# Save the original CSV file with only the columns corresponding to the responsive neurons
+df_responsive_neurons = df[list(responsive_neurons_new_csv)]
+output_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/intersection_neuronal_activity_responsive_neurons_average_102-110-AND-682-699.csv'
+df_responsive_neurons.to_csv(output_path, index=False)
+
+print(f"Filtered DataFrame with final responsive neurons saved to {output_path}")
+
+# Define start and end times for plotting 80-150/ 660-740
+# Note: stimulus window 101-106/ 681-695
+start_time = 80
+end_time = 740
+time_range = (start_time, end_time)
+
+# Plot results without legend
+plot_neuron_activity(df, responsive_neurons_new_csv, time_range, 'Responsive neurons from new CSV', show_legend=False)
+
+# %%
