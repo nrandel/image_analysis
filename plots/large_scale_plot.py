@@ -32,7 +32,7 @@ def plot_columns_in_chunks(df, chunk_size=5, x_start=None, x_end=None):
         else:
             print(f"No data plotted for columns {chunk_indices[0]} to {chunk_indices[-1]}")
 
-# Example usage:
+# Load:
 file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/intersection_neuronal_activity_responsive_neurons_sd_2_average_102-110-AND-682-699.csv'
 df = pd.read_csv(file_path, index_col = False)  # Assuming the first column is the index
 
