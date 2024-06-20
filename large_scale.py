@@ -10,14 +10,6 @@ import os
 #3. Find all neurons whose responses are 1.5 SD higher than the overall mean
 
 # %%
-# Read the CSV file into a DataFrame
-
-# dff long sliding window 1099
-#dff_long = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks-dff_long-slidingWindow.csv')
-
-# dff 
-#df = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/raw_fluorescence/F0-8_Ft-40/dff_output_Ft_100_first_stimulus.csv')
-
 # Important: behaviour.csv starts with "1", activity.csv with "0"
 #stimulus window 101-106/ 681-695
 
