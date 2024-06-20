@@ -1,53 +1,26 @@
-# Convert my behaviour.csv structure to the new WB ones
 
 #%%
+# The behaviour.csv starts with '1', and the activity starts with '0'.
+# Therefore, the behaviour.csv must -1 for star and end column 
+
 import pandas as pd
 
-# Load the CSV data
-input_csv = '/Users/nadine/Documents/paper/single-larva/18-02-15L1-behavior-ol.csv'
-df = pd.read_csv(input_csv, sep=';')
+def adjust_start_end_values(input_csv, output_csv):
+    # Read the CSV file with a semicolon delimiter
+    df = pd.read_csv(input_csv, delimiter=';')
 
-# Define the behavior mapping
-beh_map = {
-    'fw': 'F',
-    'bw': 'B',
-    'stim': 'S',
-    'hunch': 'H',
-    'other': 'O',
-    'turn': 'T',
-    'left turn': 'TL',
-    'right turn': 'TR',
-    'HP': 'HP'
-}
+    # Subtract 1 from each value in the START and END columns
+    df['START'] = df['START'] - 1
+    df['END'] = df['END'] - 1
 
-# Prepare an empty list to collect the rows for the new CSV
-new_rows = []
+    # Save the modified DataFrame to a new CSV file
+    df.to_csv(output_csv, index=False, sep=';')
 
-# Iterate through each row in the dataframe
-for _, row in df.iterrows():
-    start = row['START']
-    end = row['END']
-    for beh in beh_map.keys():
-        if row[beh] == 1:
-            new_row = [
-                start,
-                end,
-                beh_map[beh], # Behavior
-                'CW_18-02-15-L1', # Subject ID
-            ]
-            new_rows.append(new_row)
+# Example usage
+input_csv = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/18-02-15L1-behavior-ol.csv'
+output_csv = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/18-02-15L1-behavior-ol-1.csv'
+adjust_start_end_values(input_csv, output_csv)
 
-# Convert the list of rows into a DataFrame
-new_df = pd.DataFrame(new_rows, columns=[
-    'start', 'end', 'beh', 'subject_id'
-])
-
-# Save the new DataFrame to a CSV file
-output_csv = '/Users/nadine/Documents/paper/single-larva/NewFormat_18-02-15L1-behavior-ol.csv'
-new_df.to_csv(output_csv, index=False)
-
-# Output the new DataFrame for reference
-print(new_df.head())
 
 
 # %%
@@ -137,7 +110,7 @@ def filter_behaviors(df, start_range=(None, None), behaviors=None, gap_threshold
     return new_df
 
 # Read csv
-input_csv = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/18-02-15L1-behavior-ol.csv'
+input_csv = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/18-02-15L1-behavior-ol-1.csv'
 
 # Read the CSV file
 df = pd.read_csv(input_csv, sep=';')
@@ -153,7 +126,7 @@ include_greater_than_threshold = True  # Set to True to include behaviors with g
 filtered_df = filter_behaviors(df, start_range, behaviors, gap_threshold, include_less_than_threshold, include_greater_than_threshold)
 
 # Save the filtered DataFrame to a new CSV file
-output_csv = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/action/T_Threshold-3_18-02-15L1-behavior-ol_filtered_1-1000.csv'
+output_csv = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/action/Turn_threshold_3_18-02-15L1-behavior-ol_filtered_1-1000.csv'
 filtered_df.to_csv(output_csv, index=False)
 
 # Output the filtered DataFrame for reference
