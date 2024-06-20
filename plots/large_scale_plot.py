@@ -39,7 +39,7 @@ df = pd.read_csv(file_path, index_col = False)  # Assuming the first column is t
 
 # Specify x-axis range (optional)
 x_start = 80  # Replace with your desired start index 80, 640
-x_end = 140   # Replace with your desired end index 140, 740
+x_end = 740   # Replace with your desired end index 140, 740
 
 # Print some debug information
 print(f"DataFrame head:\n{df.head()}\n")
