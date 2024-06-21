@@ -317,8 +317,8 @@ behaviour_csv_path = '/Users/nadine/Documents/paper/single-larva/behavior_extrac
 output_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff/'  # Replace with your desired output directory
 
 # Parameters
-F0_window = 24  # Number of points to average for F0
-adjustment = 0  # Value to adjust F0 starting time
+F0_window = 15  # Number of points to average for F0
+adjustment = 9  # Value to adjust F0 starting time. Use 0 for no adjustment.
 
 # Load behaviour data
 behaviour_data = pd.read_csv(behaviour_csv_path)
@@ -356,3 +356,5 @@ for index, row in behaviour_data.iterrows():
     print(f"Processed row with start time {start_time} and behaviour {behaviour}.")
     print(f"DataFrame head:\n{dff.head()}\n")
     print(f"Columns in DataFrame:\n{dff.columns}\n")
+
+# %%
