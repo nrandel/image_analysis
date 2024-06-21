@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # %%
-# for dff long s;iding window
+# for dff long sliding window
 # Function to plot columns in chunks against index with specified x-axis range
 def plot_columns_in_chunks(df, chunk_size=5, x_start=None, x_end=None):
     num_cols = df.shape[1]
@@ -52,8 +52,9 @@ plot_columns_in_chunks(df, chunk_size=5, x_start=x_start, x_end=x_end)
 
 
 
+
 # %%
-# for dff from raw data
+# for dff from raw data - stimulus specific (initial code)
 # Function to plot columns in chunks against index with specified x-axis range
 def plot_columns_in_chunks(df, chunk_size=5, x_start=None, x_end=None):
     num_cols = df.shape[1]
@@ -106,6 +107,18 @@ print(f"Columns in DataFrame:\n{df.columns}\n")
 # Plot every 20 columns against the index with specified x-axis range
 plot_columns_in_chunks(df, chunk_size=5, x_start=x_start, x_end=x_end)
 
+
+
+
+
+
+
+
+
+
+
+
+
 # %%
 # Plot behavior-dff from raw data
 
@@ -140,19 +153,16 @@ def plot_columns_in_chunks(df, chunk_size=5, x_start=None, x_end=None):
             print(f"No data plotted for columns {chunk_indices[0]} to {chunk_indices[-1]}")
 
 # Load:
-#Stimulus 1
-#file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/raw_fluorescence/F0-8_Ft-40/intersection_neuronal_activity_responsive_neurons_sd_2_average_100-110-AND-680-699_For_Stimulus_1.csv'
-
-#Stimulus 2
-file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Forward_activity_of_responsive_neurons_sd_2_average_51-57.csv'
+#Beh 1
+file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Forward_activity_of_responsive_neurons_sd_2_peak_51-57.csv'
 
 
 
 df = pd.read_csv(file_path, index_col = False)  # Assuming the first column is the index
 
 # Specify x-axis range (optional)
-x_start = 40  # Replace with your desired start index 80, 640
-x_end = 140   # Replace with your desired end index 140, 740
+x_start = 10  # Replace with your desired start index 80, 640
+x_end = 130   # Replace with your desired end index 140, 740
 
 # Print some debug information
 print(f"DataFrame head:\n{df.head()}\n")
