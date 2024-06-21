@@ -38,7 +38,7 @@ file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/2024
 df = pd.read_csv(file_path, index_col = False)  # Assuming the first column is the index
 
 # Specify x-axis range (optional)
-x_start = 80  # Replace with your desired start index 80, 640
+x_start = 640  # Replace with your desired start index 80, 640
 x_end = 740   # Replace with your desired end index 140, 740
 
 # Print some debug information
@@ -154,7 +154,7 @@ def plot_columns_in_chunks(df, chunk_size=5, x_start=None, x_end=None):
 
 # Load:
 #Beh 1
-file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Forward_activity_of_responsive_neurons_sd_2_peak_51-57.csv'
+file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/HP_activity_of_responsive_neurons_sd_2_average_46.csv'
 
 
 
