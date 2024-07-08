@@ -97,7 +97,15 @@ def normalize_headers(headers):
     return [header.strip().replace('"', '').replace(' ', '') for header in headers]
 
 # Read the CSV file into a dataframe
-file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks-dff_long-slidingWindow.csv'
+# WB data
+#file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks-dff_long-slidingWindow.csv'
+
+# NR data
+#file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_klb-raw_data.csv'
+
+# NR dff
+file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/raw_fluorescence/F0-8_Ft-40/activity_of_responsive_neurons_sd_2_average_100-110.csv'
+
 df = pd.read_csv(file_path)
 
 # Normalize the headers
@@ -109,7 +117,9 @@ for col in df.columns[:5]:  # Print headers of the first 5 columns
     print(col)
 
 # Predefined columns to plot (replace with your specific column names)
-selected_columns = ["162.042179::559.396865::45.405223", "97.329884::568.200437::46.046018"]
+#selected_columns = ["235.035805::295.642623::16.318526", "243.233741::295.602835::17.998019"]
+selected_columns = ["296.468774::453.023438::30.552028", "156.132785::418.524036::8.528740", "294.232986::464.458234::47.435177", "183.112771::448.796633::35.421674"]
+
 
 # Normalize predefined column names to match dataframe headers
 selected_columns = [col.strip().replace('"', '').replace(' ', '') for col in selected_columns]
