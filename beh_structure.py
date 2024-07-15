@@ -1,6 +1,10 @@
+#%%
+# Import
+import pandas as pd
 
 #%%
-# The behaviour.csv starts with '1', and the activity starts with '0'.
+"""
+# Adjust behaviour.cs starting with '1', to the activity.csv starts with '0'.
 # Therefore, the behaviour.csv must -1 for star and end column 
 
 import pandas as pd
@@ -16,17 +20,16 @@ def adjust_start_end_values(input_csv, output_csv):
     # Save the modified DataFrame to a new CSV file
     df.to_csv(output_csv, index=False, sep=';')
 
-# Example usage
+# Date
 input_csv = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/18-02-15L1-behavior-ol.csv'
 output_csv = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/18-02-15L1-behavior-ol-1.csv'
 adjust_start_end_values(input_csv, output_csv)
-
-
+"""
 
 # %%
-# Extract sprcific behaviours, during a specific time window
+# Extract sprcific behaviours, during a specific time window, e.g., 0-1000 frammes
 # Control for subsequent behaviours
-# No threshold (gap_threshold = None): Extract behaviors without any gap threshold.
+# No threshold (gap_threshold = None): Extract behaviors without any gap threshold (== frames between actions).
 # gap_threshold set with include_less_than_threshold = True: Extract behaviors where the gap between the end of one behavior and the start of the next is less than or equal to gap_threshold.
 # gap_threshold set with include_greater_than_threshold = True: Extract behaviors where the gap between the end of one behavior and the start of the next is strictly greater than gap_threshold.
 # Usage:
@@ -34,8 +37,6 @@ adjust_start_end_values(input_csv, output_csv)
 # Include Behaviors <= Threshold: Set gap_threshold and include_less_than_threshold = True.
 # Include Behaviors > Threshold: Set gap_threshold and include_greater_than_threshold = True.
 
-
-import pandas as pd
 
 def filter_behaviors(df, start_range=(None, None), behaviors=None, gap_threshold=None, include_less_than_threshold=False, include_greater_than_threshold=False):
     # Define the behavior mapping
@@ -117,8 +118,8 @@ df = pd.read_csv(input_csv, sep=';')
 
 # Set the start range and behaviors to filter (optional)
 start_range = (1, 1000)
-behaviors = ['T']  # Example specific behaviors to filter for 'F', 'T', 'HP'
-gap_threshold = 3  # Example gap threshold in the same time unit as START and END columns
+behaviors = ['T']  # Sspecific behaviors to filter for 'F', 'T', 'HP'
+gap_threshold = 3  # Gap threshold in the same time unit as START and END columns
 include_less_than_threshold = False  # Set to True to include behaviors with gaps less than or equal to threshold
 include_greater_than_threshold = True  # Set to True to include behaviors with gaps strictly greater than threshold
 
