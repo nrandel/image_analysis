@@ -232,6 +232,9 @@ for neuron_id in neurons_to_plot:
 plt.tight_layout()
 plt.show()
 
+
+
+
 # %%
 # plot fot single cell ca-imaging
 import pandas as pd
