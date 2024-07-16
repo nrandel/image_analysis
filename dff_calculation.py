@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import os
 
 #%%
-"adjust 9 not working - fixing in progress"
+
 #%%
 # Calculate action specific dff with specific F0 and before action-start (Ft)
 # ADAPT FO AVERAGE WINDOW START - ADD ADJUSTMENT 
