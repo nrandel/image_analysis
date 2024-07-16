@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import os
 
 #%%
-#Stimulus: 101-106/ 681-695
+#Stimulus: 100-105/ 680-694
 
 # %%
-"Important: behaviour.csv starts with '1', activity.csv with '0' - fixed for MY dff, not here (I think)"
+"Important: behaviour.csv starts with '1', activity.csv with '0' - fixed for MY dff (edited) and sliding window (raw)"
 
 #%%
 #1. Pick a certain time window and read out the peak DF/F and the average DF/F in that time window for each cell body
@@ -125,7 +125,7 @@ df_responsive_neurons_average.to_csv(os.path.join(save_dir, "activity_of_respons
 #df_non_responsive_neurons.to_csv(os.path.join(save_dir, "activity_of_non_responsive_neurons_682-699.csv"), index=False)
 
 # Define start and end times for plotting 80-150/ 660-740
-# Note: stimulus window 101-106/ 681-695
+# Note: stimulus window 100-105/ 680-694
 start_time = 80
 end_time = 150
 time_range = (start_time, end_time)
@@ -143,7 +143,7 @@ plot_neuron_activity(df, responsive_neurons_average.index, time_range, 'Responsi
 # Input: Neuron names that meet the statistic requirements for each event.
 # Output: Neuron names! that meet statistic requirements for both events.
 
-# Load the two CSV files
+# Load the two CSV files == each csv for a single event
 df1 = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/responsive_neurons_sd_2_average_100-110.csv', header=None)
 df2 = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/responsive_neurons_sd_2_average_680-699.csv', header=None)
 
@@ -171,11 +171,6 @@ print("Intersection saved to output.csv")
 # Input 2: df == activity traces for each cell body in the brain, 
 # read out from tif stack generated with sliding window for dff
 # Output: Neuron traces that meet statistic requirements for both events (csv and plot)
-
-
-import pandas as pd
-import os
-import matplotlib.pyplot as plt
 
 def plot_neuron_activity(df, neurons, time_range, title, show_legend=True):
     plt.figure(figsize=(12, 8))
