@@ -143,16 +143,23 @@ plot_neuron_activity(df, responsive_neurons_average.index, time_range, 'Responsi
 # Input: Neuron names that meet the statistic requirements for each event.
 # Output: Neuron names! that meet statistic requirements for both events.
 
-# Load the two CSV files == each csv for a single event
-df1 = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/responsive_neurons_sd_2_average_100-110.csv', header=None)
-df2 = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/responsive_neurons_sd_2_average_680-699.csv', header=None)
+# List of file paths
+file_paths = [
+    '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/responsive_neurons_sd_2_average_100-110.csv',
+    '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/responsive_neurons_sd_2_average_100-110.csv',
+    # Add more file paths as needed
+]
+
+# Read the CSV files into a list of dataframes
+dfs = [pd.read_csv(file_path, header=None) for file_path in file_paths]
 
 # Extract the first column from each dataframe
-df1_first_col = df1[[0]]
-df2_first_col = df2[[0]]
+first_columns = [df[[0]] for df in dfs]
 
 # Find the intersection of the first columns
-intersection = pd.merge(df1_first_col, df2_first_col, how='inner')
+intersection = first_columns[0]
+for col in first_columns[1:]:
+    intersection = pd.merge(intersection, col, how='inner')
 
 # Add a header to the intersection dataframe
 intersection.columns = ['cell coordinates']
