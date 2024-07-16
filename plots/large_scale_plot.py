@@ -152,8 +152,10 @@ def plot_columns_in_chunks(df, chunk_size=5, x_start=None, x_end=None):
 
 # Load:
 #Beh 1
-file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/HP_activity_of_responsive_neurons_sd_2_average_46.csv'
+#file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F/Forward_F0_15_adjust_0_activity_of_responsive_neurons_sd_1-5_average_51.csv'
 
+#Beh 2
+file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F/Forward_F0_15_adjust_9_activity_of_responsive_neurons_sd_1-5_average_51.csv'
 
 
 df = pd.read_csv(file_path, index_col = False)  # Assuming the first column is the index
