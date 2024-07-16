@@ -6,7 +6,11 @@ import matplotlib.pyplot as plt
 import os
 
 #%%
-#Stimulus: 100-105/ 680-694
+"Actions for 1099, using 0-1000 frames with threshold 3 == frames between actions"
+# Stimulus: 100-105/ 680-694 (2)
+# Forward: (26)
+# Turn: (14)
+# HP: (27)
 
 # %%
 "Important: behaviour.csv starts with '1', activity.csv with '0' - fixed (edited file)"
@@ -20,7 +24,7 @@ import os
 # Input: df == activity traces for each cell body in the brain, 
 # read out from tif stack generated with sliding window for dff
 # Output: Neuron names and activity that meet the statistic requirements. Specifically for each event
-
+# check for existing filename before saving
 
 def plot_neuron_activity(df, neurons, time_range, title):
     plt.figure(figsize=(12, 8))
@@ -33,15 +37,21 @@ def plot_neuron_activity(df, neurons, time_range, title):
     plt.grid(True)
     plt.show()
 
-def save_neurons_to_csv(neurons, filename, path=''):  # Add a path parameter with default value ''
-    filepath = os.path.join(path, filename)  # Construct the full file path
+def save_neurons_to_csv(neurons, filename, path=''):  
+    filepath = os.path.join(path, filename)  
+    if os.path.exists(filepath):
+        overwrite = input(f"File {filepath} already exists. Do you want to overwrite it? (y/n): ")
+        if overwrite.lower() != 'y':
+            print(f"File {filepath} not saved.")
+            return
     pd.DataFrame(neurons).to_csv(filepath, header=False)
+    print(f"File {filepath} saved successfully.")
 
 # Load the dataset from the CSV file
 
 # dff from dff_calculation.py
 "Select"
-df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/output_dff_S_680.csv')
+df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/output_dff_F_51.csv')
 
 # Drop the 'timepoint' column and use the index as the new timepoint
 df.drop(columns=['timepoint'], inplace=True)
@@ -51,7 +61,9 @@ df.drop(columns=['timepoint'], inplace=True)
 
 "Adjust time window for statistic analysis SD"
 "Stimulus: Ft, action end + 5 frames"
-time_window = list(range(680, 699))
+"Action Adjust 0: Ft, Ft + 12"
+"Action Adjust 9: Ft - 9, Ft + 12"
+time_window = list(range(51, 63))
 
 # Extract the relevant rows for the time window using the index as timepoint
 time_window_data = df.iloc[time_window]
@@ -111,13 +123,14 @@ print(non_responsive_neurons)
 # Define the directory where you want to save the files
 
 # Save to directory
-save_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff'
+"change dir; Stim, F, HP, T"
+save_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F'
 
 
 # Save neurons to CSV files with specified path
 "change name: Event_F0_adjust_SD_peak or avg_eventstart"
 #save_neurons_to_csv(responsive_neurons_peak, "Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_peak_680.csv", path=save_dir)
-save_neurons_to_csv(responsive_neurons_average, "Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_680.csv", path=save_dir)
+save_neurons_to_csv(responsive_neurons_average, "Forward_F0_15_adjust_0_responsive_neurons_sd_1-5_average_51.csv", path=save_dir)
 #save_neurons_to_csv(difference_neurons, "difference_neurons_682-699.csv", path=save_dir)
 #save_neurons_to_csv(responsive_neurons_intersection, "responsive_neurons_intersectio_682-699.csv", path=save_dir)
 #save_neurons_to_csv(non_responsive_neurons, "non_responsive_neurons_682-699.csv", path=save_dir)
@@ -131,15 +144,15 @@ df_responsive_neurons_average = df[list(responsive_neurons_average.index)]
 
 "change name: Event_F0_adjust_SD_peak or avg_eventstart"
 #df_responsive_neurons_peak.to_csv(os.path.join(save_dir, "Stimulus_F0_15_adjust_0_activity_of_responsive_neurons_sd_1-5_peak_680.csv"), index=False)
-df_responsive_neurons_average.to_csv(os.path.join(save_dir, "Stimulus_F0_15_adjust_0_activity_of_responsive_neurons_sd_1-5_average_680.csv"), index=False)
+df_responsive_neurons_average.to_csv(os.path.join(save_dir, "Forward_F0_15_adjust_0_activity_of_responsive_neurons_sd_1-5_average_51.csv"), index=False)
 #df_difference_neurons.to_csv(os.path.join(save_dir, "activity_of_difference_neurons_682-699.csv"), index=False)
 #df_responsive_neurons_intersection.to_csv(os.path.join(save_dir, "activity_of_responsive_neurons_intersection_682-699.csv"), index=False)
 #df_non_responsive_neurons.to_csv(os.path.join(save_dir, "activity_of_non_responsive_neurons_682-699.csv"), index=False)
 
 # Define start and end times for plotting 80-150/ 660-740
 # Note: stimulus window 100-105/ 680-694
-start_time = 660
-end_time = 740
+start_time = 30
+end_time = 100
 time_range = (start_time, end_time)
 
 # Plot results
@@ -155,8 +168,8 @@ plot_neuron_activity(df, responsive_neurons_average.index, time_range, 'Responsi
 
 # List of file paths
 file_paths = [
-    '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_100.csv',
-    '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_680.csv',
+    '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stim/Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_100.csv',
+    '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stim/Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_680.csv',
     # Add more file paths as needed
 ]
 
@@ -176,14 +189,14 @@ intersection.columns = ['cell coordinates']
 
 # Save the result to a new CSV file
 "change name"
-output_file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Intersection_Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_100_AND_680.csv'
+output_file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stim/Intersection_Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_100_AND_680.csv'
 intersection.to_csv(output_file_path, index=False)
 
 print("Intersection saved to", output_file_path)
 
 
 #%%
-"very restricted - needs to be more generic to handle multiple events"
+"very restricted - needs to be more generic to handle multiple events" #TODO
 # Get neuron activity that meet statistic for actions fron the intersectionn of responsive neurons
 
 # Input 1: inntersection_df == Neuron names! that meet statistic requirements for both events.
@@ -213,10 +226,10 @@ def save_neurons_to_csv(neurons, filename, path=''):
 "change name"
 "needs to be run separately for action 1 and action 2"
 # Neuronal activity for action 1
-#df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stimulus_F0_15_adjust_0_activity_of_responsive_neurons_sd_1-5_average_100.csv')
+#df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stim/Stimulus_F0_15_adjust_0_activity_of_responsive_neurons_sd_1-5_average_100.csv')
 
 # Neuronal activity for action 2
-df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stimulus_F0_15_adjust_0_activity_of_responsive_neurons_sd_1-5_average_680.csv')
+df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stim/Stimulus_F0_15_adjust_0_activity_of_responsive_neurons_sd_1-5_average_680.csv')
 
 
 # Clean column names to remove leading/trailing spaces and quotes
@@ -224,7 +237,7 @@ df.columns = df.columns.str.strip().str.replace('"', '')
 
 # Load the second CSV file to find the intersection
 "change name"
-intersection_df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Intersection_Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_100_AND_680.csv')
+intersection_df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stim/Intersection_Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_100_AND_680.csv')
 
 # Assuming that 'intersection_df' contains the responsive neuron identifiers in the first column
 responsive_neurons_new_csv = intersection_df.iloc[:, 0].values
@@ -243,10 +256,10 @@ df_responsive_neurons = df[matching_neurons]
 "change name"
 "needs to be run separately for action 1 and action 2"
 # Action 1
-#output_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Intersection_Stimulus_F0_15_adjust_0_neuronal_activity_responsive_neurons_sd_1-5_average_100_AND_680_For_Action_1.csv'
+#output_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stim/Intersection_Stimulus_F0_15_adjust_0_neuronal_activity_responsive_neurons_sd_1-5_average_100_AND_680_For_Action_1.csv'
 
 # Action 2
-output_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Intersection_Stimulus_F0_15_adjust_0_neuronal_activity_responsive_neurons_sd_1-5_average_100_AND_680_For_Action_2.csv'
+output_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stim/Intersection_Stimulus_F0_15_adjust_0_neuronal_activity_responsive_neurons_sd_1-5_average_100_AND_680_For_Action_2.csv'
 
 
 df_responsive_neurons.to_csv(output_path, index=False)
@@ -264,4 +277,58 @@ plot_neuron_activity(df, matching_neurons, time_range, 'Responsive neurons from 
 
 
 
+
+# %%
+# Plot neuronal activity (intersection) per action. 
+# Plot columns in chunks against index with specified x-axis range
+
+def plot_columns_in_chunks(df, chunk_size=5, x_start=None, x_end=None):
+    num_cols = df.shape[1]
+    column_chunks = [range(i, min(i + chunk_size, num_cols)) for i in range(0, num_cols, chunk_size)]
+
+    for chunk_indices in column_chunks:
+        plt.figure(figsize=(12, 8))
+        
+        plotted_anything = False  # Flag to check if anything was actually plotted
+        
+        for col_idx in chunk_indices:
+            col_name = df.columns[col_idx]
+            plt.plot(df.index, df[col_name], label=col_name)
+            plotted_anything = True  # Set flag to True if at least one plot was made
+        
+        if plotted_anything:
+            plt.title(f'Columns {chunk_indices[0]} to {chunk_indices[-1]} vs Index')
+            plt.xlabel('Index')
+            plt.ylabel('Values')
+            plt.legend()
+            plt.grid(True)
+            
+            if x_start is not None and x_end is not None:
+                plt.xlim(x_start, x_end)  # Set x-axis limits if provided
+            
+            plt.show()
+        else:
+            print(f"No data plotted for columns {chunk_indices[0]} to {chunk_indices[-1]}")
+
+# Load:
+#Beh 1
+#file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stim/Intersection_Stimulus_F0_15_adjust_0_neuronal_activity_responsive_neurons_sd_1-5_average_100_AND_680_For_Action_1.csv'
+
+#Beh 2
+file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stim/Intersection_Stimulus_F0_15_adjust_0_neuronal_activity_responsive_neurons_sd_1-5_average_100_AND_680_For_Action_1.csv'
+
+
+df = pd.read_csv(file_path, index_col = False)  # Assuming the first column is the index
+
+# Specify x-axis range (optional)
+x_start = 640  # Replace with your desired start index 80, 640
+x_end = 740   # Replace with your desired end index 140, 740
+
+# Print some debug information
+print(f"DataFrame head:\n{df.head()}\n")
+print(f"Index values:\n{df.index}\n")
+print(f"Columns in DataFrame:\n{df.columns}\n")
+
+# Plot every 20 columns against the index with specified x-axis range
+plot_columns_in_chunks(df, chunk_size=5, x_start=x_start, x_end=x_end)
 # %%

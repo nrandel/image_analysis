@@ -8,3 +8,6 @@ import os
 
 #temp testing
 # %%
+def save_neurons_to_csv(neurons, filename, path=''):  # Add a path parameter with default value ''
+    filepath = os.path.join(path, filename)  # Construct the full file path
+    pd.DataFrame(neurons).to_csv(filepath, header=False)

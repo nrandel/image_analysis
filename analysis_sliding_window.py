@@ -5,7 +5,11 @@ import matplotlib.pyplot as plt
 import os
 
 #%%
-#Stimulus: 100-105/ 680-694
+"Actions for 1099, using 0-1000 frames with threshold 3 == frames between actions"
+# Stimulus: 100-105/ 680-694 (2)
+# Forward: (26)
+# Turn: (14)
+# HP: (27)
 
 # %%
 "Important: behaviour.csv starts with '1', activity.csv with '0' - fixed for MY dff (edited) and sliding window (raw)"
@@ -100,7 +104,8 @@ print(non_responsive_neurons)
 """
 
 # Define the directory where you want to save the files
-save_dir = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/'
+"change dir; Stim, F, HP, T"
+save_dir = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/F'
 
 # Save neurons to CSV files with specified path
 "change name"
@@ -225,3 +230,6 @@ time_range = (start_time, end_time)
 plot_neuron_activity(df, responsive_neurons_new_csv, time_range, 'Responsive neurons from new CSV', show_legend=False)
 
 # %%
+
+
+# Input:
