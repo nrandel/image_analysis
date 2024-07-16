@@ -153,27 +153,37 @@ plot_neuron_activity(df, responsive_neurons_average.index, time_range, 'Responsi
 # Input: Neuron names that meet the statistic requirements for each event.
 # Output: Neuron names! that meet statistic requirements for both events.
 
-# Load the two CSV files == each csv == resposive neurrons for a single event
-df1 = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_100.csv', header=None)
-df2 = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_680.csv', header=None)
+# List of file paths
+file_paths = [
+    '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_100.csv',
+    '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_680.csv',
+    # Add more file paths as needed
+]
+
+# Read the CSV files into a list of dataframes
+dfs = [pd.read_csv(file_path, header=None) for file_path in file_paths]
 
 # Extract the first column from each dataframe
-df1_first_col = df1[[0]]
-df2_first_col = df2[[0]]
+first_columns = [df[[0]] for df in dfs]
 
 # Find the intersection of the first columns
-intersection = pd.merge(df1_first_col, df2_first_col, how='inner')
+intersection = first_columns[0]
+for col in first_columns[1:]:
+    intersection = pd.merge(intersection, col, how='inner')
 
 # Add a header to the intersection dataframe
 intersection.columns = ['cell coordinates']
 
 # Save the result to a new CSV file
-"change file name"
-intersection.to_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Intersection_Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_100_AND_680.csv', index=False)
+"change name"
+output_file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Intersection_Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_average_100_AND_680.csv'
+intersection.to_csv(output_file_path, index=False)
 
-print("Intersection saved to output.csv")
+print("Intersection saved to", output_file_path)
+
 
 #%%
+"very restricted - needs to be more generic to handle multiple events"
 # Get neuron activity that meet statistic for actions fron the intersectionn of responsive neurons
 
 # Input 1: inntersection_df == Neuron names! that meet statistic requirements for both events.
@@ -236,7 +246,7 @@ df_responsive_neurons = df[matching_neurons]
 #output_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Intersection_Stimulus_F0_15_adjust_0_neuronal_activity_responsive_neurons_sd_1-5_average_100_AND_680_For_Action_1.csv'
 
 # Action 2
-output_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Intersection_Stimulus_F0_15_adjust_0_neuronal_activity_responsive_neurons_sd_1-5_average_100_AND_680_For_Action_1.csv'
+output_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/Intersection_Stimulus_F0_15_adjust_0_neuronal_activity_responsive_neurons_sd_1-5_average_100_AND_680_For_Action_2.csv'
 
 
 df_responsive_neurons.to_csv(output_path, index=False)
