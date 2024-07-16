@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import os
 
 #%%
-
+"adjust 9 not working - fixing in progress"
 #%%
 # Calculate action specific dff with specific F0 and before action-start (Ft)
 # ADAPT FO AVERAGE WINDOW START - ADD ADJUSTMENT 
@@ -86,11 +86,11 @@ activity_csv_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-d
 behaviour_csv_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/action/Stimulus_18-02-15L1-behavior-ol_filtered_1-1000.csv'  
 # output file name: F0 average over 15 frames, 
 # adjust == F0 window calculated 9 frames before start of behaviour (Ft)
-output_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/'  
+output_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/'  
 
 # Parameters
 F0_window = 15  # Number of points to average for F0
-adjustment = 0  # Value to adjust F0 starting time. Use 0 for no adjustment.
+adjustment = 9  # Value to adjust F0 starting time. Use 0 for no adjustment.
 
 # Load behaviour data
 behaviour_data = pd.read_csv(behaviour_csv_path)
@@ -128,5 +128,65 @@ for index, row in behaviour_data.iterrows():
     print(f"Processed row with start time {start_time} and behaviour {behaviour}.")
     print(f"DataFrame head:\n{dff.head()}\n")
     print(f"Columns in DataFrame:\n{dff.columns}\n")
+
+# %%
+# Test output dff with specific columns
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Step 1: Read the CSV file
+file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/output_dff_S_100.csv'
+df = pd.read_csv(file_path)
+
+# Check if 'timepoint' column exists and drop it
+if 'timepoint' in df.columns:
+    df.drop(columns=['timepoint'], inplace=True)
+
+# Reset the index to use it as the new timepoint
+df.reset_index(drop=True, inplace=True)
+
+# Step 2: Select the first 10 columns and rows from index 10 to 110
+df_first_10_columns = df.iloc[10:150, 500:600] #row 10-150, columnn 500-600
+
+# Step 3: Plot the line plot
+plt.figure(figsize=(20, 10))  # Adjust the size as needed
+sns.lineplot(data=df_first_10_columns, dashes=False, markers=False, style=None)
+plt.title('Line Plot of First 10 Columns (Rows 10 to 110)')
+plt.xlabel('Index')
+plt.ylabel('Values')
+plt.show()
+
+
+# %%
+# Test output dff with specific header names
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Step 1: Read the CSV file
+file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/output_dff_S_100.csv'
+df = pd.read_csv(file_path)
+
+# List of selected column headers
+selected_columns = [
+    "296.468774::453.023438::30.552028",
+    "156.132785::418.524036::8.528740",
+    "294.232986::464.458234::47.435177",
+    "183.112771::448.796633::35.421674"
+]
+
+# Step 2: Select the specified columns and rows from index 10 to 200
+df_selected_columns = df.loc[10:200, selected_columns]
+
+# Step 3: Plot the line plot
+plt.figure(figsize=(20, 10))  # Adjust the size as needed
+sns.lineplot(data=df_selected_columns)
+plt.title('Line Plot of Selected Columns (Rows 10 to 110)')
+plt.xlabel('Index')
+plt.ylabel('Values')
+plt.show()
 
 # %%
