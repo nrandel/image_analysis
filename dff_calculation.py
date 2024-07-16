@@ -4,9 +4,6 @@ import matplotlib.pyplot as plt
 import os
 
 #%%
-# Stimulus window: 101-106
-# Stimulus window: 681-695
-#%%
 
 #%%
 # Calculate action specific dff with specific F0 and before action-start (Ft)
@@ -86,14 +83,14 @@ def plot_dff(dff, output_plot_path):
 
 # Paths
 activity_csv_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_klb-raw_data.csv'  
-behaviour_csv_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/action/Turn_threshold_3_18-02-15L1-behavior-ol_filtered_1-1000.csv'  
+behaviour_csv_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/action/Stimulus_18-02-15L1-behavior-ol_filtered_1-1000.csv'  
 # output file name: F0 average over 15 frames, 
 # adjust == F0 window calculated 9 frames before start of behaviour (Ft)
-output_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/'  
+output_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/'  
 
 # Parameters
 F0_window = 15  # Number of points to average for F0
-adjustment = 9  # Value to adjust F0 starting time. Use 0 for no adjustment.
+adjustment = 0  # Value to adjust F0 starting time. Use 0 for no adjustment.
 
 # Load behaviour data
 behaviour_data = pd.read_csv(behaviour_csv_path)
