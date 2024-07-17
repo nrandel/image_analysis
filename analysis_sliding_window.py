@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import re
+import glob
 
 #%%
 "Actions for 1099, using 0-1000 frames with threshold 3 == frames between actions"
@@ -97,88 +99,133 @@ for index, row in time_windows_df.iterrows():
 # Input: Neuron names that meet the statistic requirements for each event.
 # Output: Neuron names! that meet statistic requirements for both events.
 
-# List of file paths
-file_paths = [
-    '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/responsive_neurons_sd_2_average_100-110.csv',
-    '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/responsive_neurons_sd_2_average_100-110.csv',
-    # Add more file paths as needed
-]
+import pandas as pd
+import os
+import re
+import glob
 
-# Read the CSV files into a list of dataframes
-dfs = [pd.read_csv(file_path, header=None) for file_path in file_paths]
+# Directory containing the stimulus files
+input_dir = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/T_adjust-9/'
 
-# Extract the first column from each dataframe
-first_columns = [df[[0]] for df in dfs]
+# Use glob to list all CSV files in the directory
+file_paths = glob.glob(os.path.join(input_dir, 'Turn_long-sliding-window_activity_of_responsive_neurons_sd_1-5_average_*.csv'))
 
-# Find the intersection of the first columns
-intersection = first_columns[0]
-for col in first_columns[1:]:
-    intersection = pd.merge(intersection, col, how='inner')
+# Extract action and timepoints from file paths
+pattern = r'Turn_(.*?)_average_(\d+).csv'
+actions_timepoints = [(re.search(pattern, os.path.basename(fp)).groups()) for fp in file_paths]
+actions, timepoints = zip(*actions_timepoints)
+timepoints = sorted(map(int, timepoints))
 
-# Add a header to the intersection dataframe
-intersection.columns = ['cell coordinates']
+# Read the CSV files into a list of dataframes and debug the content
+dfs = []
+for file_path in file_paths:
+    try:
+        df = pd.read_csv(file_path)
+        dfs.append(df)
+        print(f"Contents of {file_path}:")
+        print(df.head())
+    except pd.errors.EmptyDataError:
+        print(f"Warning: {file_path} is empty or improperly formatted and will be skipped.")
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}")
 
-# Save the result to a new CSV file
-"change file name"
-intersection.to_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/intersection_responsive_neurons_sd_2_average_100-110-AND-680-699.csv', index=False)
+# Extract the headers from each dataframe
+headers = [set(df.columns) for df in dfs]
 
-print("Intersection saved to output.csv")
+# Find the common headers across all dataframes
+common_headers = set.intersection(*headers)
 
+print(f"Common headers: {common_headers}")
 
-#%%
-# Get neuron activity that meet statistic for actions
+# Filter the dataframes to include only the common headers
+filtered_dfs = [df[list(common_headers)] for df in dfs]
 
-# Input 1: inntersection_df == Neuron names! that meet statistic requirements for both events.
-# Input 2: df == activity traces for each cell body in the brain, 
-# read out from tif stack generated with sliding window for dff
-# Output: Neuron traces that meet statistic requirements for both events (csv and plot)
+# Function to save the filtered dataframes with common headers
+def save_intersections(filtered_dfs, timepoints, save_dir, action):
+    intersection = filtered_dfs[0]
+    cumulative_timepoints = [timepoints[0]]
+    
+    for i, df in enumerate(filtered_dfs[1:], start=1):
+        intersection = pd.merge(intersection, df, how='inner', on=list(common_headers))
+        cumulative_timepoints.append(timepoints[i])
+        
+        # Generate the filename
+        filename = f"Intersection_Stimulus_{action}_average_{'_'.join(map(str, cumulative_timepoints))}.csv"
+        filepath = os.path.join(save_dir, filename)
+        
+        # Save the result to a new CSV file
+        intersection.to_csv(filepath, index=False)
+        print(f"Intersection saved to {filepath}")
+    
+    # Return the final intersection for debugging
+    return intersection
 
-def plot_neuron_activity(df, neurons, time_range, title, show_legend=True):
-    plt.figure(figsize=(12, 8))
-    for neuron in neurons:
-        plt.plot(df.index[time_range[0]:time_range[1]+1], df[neuron][time_range[0]:time_range[1]+1], label=neuron)
-    plt.title(title)
-    plt.xlabel('Timepoint')
-    plt.ylabel('ΔF/F')
-    if show_legend:
-        plt.legend(loc='upper right', fontsize='small')
-    plt.grid(True)
-    plt.show()
+# Save directory
+save_dir = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/T_adjust-9/intersection'
 
-def save_neurons_to_csv(neurons, filename, path=''):
-    filepath = os.path.join(path, filename)
-    pd.DataFrame(neurons).to_csv(filepath, header=False)
+# Ensure the save directory exists
+os.makedirs(save_dir, exist_ok=True)
 
-# Load the dataset from the CSV file
-df = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/measurements_t_stacks-dff_long-slidingWindow.csv')
+# Save intersections and get the final intersection for debugging
+if filtered_dfs:
+    final_intersection = save_intersections(filtered_dfs, timepoints, save_dir, actions[0])
+    
+    # Debug the final intersection dataframe
+    print("Final intersection dataframe:")
+    print(final_intersection.head())
+else:
+    print("No valid dataframes to process.")
 
-# Drop the 'timepoint' column and use the index as the new timepoint
-df.drop(columns=['timepoint'], inplace=True)
-
-# Load the second CSV file to find the intersection
-intersection_df = pd.read_csv('/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/intersection_responsive_neurons_sd_2_average_100-110-AND-680-699.csv')
-
-# Assuming that 'intersection_df' contains the responsive neuron identifiers in the first column
-responsive_neurons_new_csv = intersection_df.iloc[:, 0].values
-
-# Save the original CSV file with only the columns corresponding to the responsive neurons
-df_responsive_neurons = df[list(responsive_neurons_new_csv)]
-output_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/intersection_neuronal_activity_responsive_neurons_sd_2_average_100-110-AND-680-699.csv'
-
-df_responsive_neurons.to_csv(output_path, index=False)
-
-print(f"Filtered DataFrame with final responsive neurons saved to {output_path}")
-
-# Define start and end times for plotting 80-150/ 660-740
-# Note: stimulus window 101-106/ 681-695
-start_time = 80
-end_time = 740 # adjust
-time_range = (start_time, end_time)
-
-# Plot results without legend
-plot_neuron_activity(df, responsive_neurons_new_csv, time_range, 'Responsive neurons from new CSV', show_legend=False)
 
 # %%
+"move later to plot/"
+# Function to plot columns in chunks against index with specified x-axis range
+
+def plot_columns_in_chunks(df, chunk_size=5, x_start=None, x_end=None):
+    num_cols = df.shape[1]
+    column_chunks = [range(i, min(i + chunk_size, num_cols)) for i in range(0, num_cols, chunk_size)]
+
+    for chunk_indices in column_chunks:
+        plt.figure(figsize=(12, 8))
+        
+        plotted_anything = False  # Flag to check if anything was actually plotted
+        
+        for col_idx in chunk_indices:
+            col_name = df.columns[col_idx]
+            plt.plot(df.index, df[col_name], label=col_name)
+            plotted_anything = True  # Set flag to True if at least one plot was made
+        
+        if plotted_anything:
+            plt.title(f'Columns {chunk_indices[0]} to {chunk_indices[-1]} vs Index')
+            plt.xlabel('Index')
+            plt.ylabel('Values')
+            plt.legend()
+            plt.grid(True)
+            
+            if x_start is not None and x_end is not None:
+                plt.xlim(x_start, x_end)  # Set x-axis limits if provided
+            
+            plt.show()
+        else:
+            print(f"No data plotted for columns {chunk_indices[0]} to {chunk_indices[-1]}")
+
+# Load:
+file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/T/intersection/Intersection_Stimulus_long-sliding-window_activity_of_responsive_neurons_sd_1-5_average_13_33_59_120_295_324_343_386_427_476_517_544_574_615_669.csv'
+df = pd.read_csv(file_path, index_col = False)  # Assuming the first column is the index
+
+# Specify x-axis range (optional)
+x_start = 3  # Replace with your desired start index 80, 640
+x_end = 130   # Replace with your desired end index 140, 740
+
+# Print some debug information
+print(f"DataFrame head:\n{df.head()}\n")
+print(f"Index values:\n{df.index}\n")
+print(f"Columns in DataFrame:\n{df.columns}\n")
+
+# Plot every 20 columns against the index with specified x-axis range
+plot_columns_in_chunks(df, chunk_size=5, x_start=x_start, x_end=x_end)
 
 
-# Input:
+
+
+# %%
