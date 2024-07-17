@@ -130,63 +130,6 @@ for index, row in behaviour_data.iterrows():
     print(f"Columns in DataFrame:\n{dff.columns}\n")
 
 # %%
-# Test output dff with specific columns
 
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-# Step 1: Read the CSV file
-file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/output_dff_S_100.csv'
-df = pd.read_csv(file_path)
-
-# Check if 'timepoint' column exists and drop it
-if 'timepoint' in df.columns:
-    df.drop(columns=['timepoint'], inplace=True)
-
-# Reset the index to use it as the new timepoint
-df.reset_index(drop=True, inplace=True)
-
-# Step 2: Select the first 10 columns and rows from index 10 to 110
-df_first_10_columns = df.iloc[10:150, 500:600] #row 10-150, columnn 500-600
-
-# Step 3: Plot the line plot
-plt.figure(figsize=(20, 10))  # Adjust the size as needed
-sns.lineplot(data=df_first_10_columns, dashes=False, markers=False, style=None)
-plt.title('Line Plot of First 10 Columns (Rows 10 to 110)')
-plt.xlabel('Index')
-plt.ylabel('Values')
-plt.show()
-
-
-# %%
-# Test output dff with specific header names
-
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-# Step 1: Read the CSV file
-file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/output_dff_S_100.csv'
-df = pd.read_csv(file_path)
-
-# List of selected column headers
-selected_columns = [
-    "296.468774::453.023438::30.552028",
-    "156.132785::418.524036::8.528740",
-    "294.232986::464.458234::47.435177",
-    "183.112771::448.796633::35.421674"
-]
-
-# Step 2: Select the specified columns and rows from index 10 to 200
-df_selected_columns = df.loc[10:200, selected_columns]
-
-# Step 3: Plot the line plot
-plt.figure(figsize=(20, 10))  # Adjust the size as needed
-sns.lineplot(data=df_selected_columns)
-plt.title('Line Plot of Selected Columns (Rows 10 to 110)')
-plt.xlabel('Index')
-plt.ylabel('Values')
-plt.show()
 
 # %%
