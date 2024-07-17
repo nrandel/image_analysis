@@ -107,14 +107,16 @@ import glob
 # Directory containing the stimulus files
 input_dir = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/T_adjust-9/'
 
-# Use glob to list all CSV files in the directory
-file_paths = glob.glob(os.path.join(input_dir, 'Turn_long-sliding-window_activity_of_responsive_neurons_sd_1-5_average_*.csv'))
+# Define the action manually
+action = 'Turn'
 
-# Extract action and timepoints from file paths
-pattern = r'Turn_(.*?)_average_(\d+).csv'
+# Use glob to list all CSV files in the directory
+file_paths = glob.glob(os.path.join(input_dir, f'{action}_long-sliding-window_activity_of_responsive_neurons_sd_1-5_average_*.csv'))
+
+# Extract timepoints from file paths
+pattern = rf'{action}_(.*?)_average_(\d+).csv'
 actions_timepoints = [(re.search(pattern, os.path.basename(fp)).groups()) for fp in file_paths]
-actions, timepoints = zip(*actions_timepoints)
-timepoints = sorted(map(int, timepoints))
+timepoints = sorted(map(int, [tp[1] for tp in actions_timepoints]))
 
 # Read the CSV files into a list of dataframes and debug the content
 dfs = []
@@ -150,7 +152,7 @@ def save_intersections(filtered_dfs, timepoints, save_dir, action):
         cumulative_timepoints.append(timepoints[i])
         
         # Generate the filename
-        filename = f"Intersection_Stimulus_{action}_average_{'_'.join(map(str, cumulative_timepoints))}.csv"
+        filename = f"Intersection_{action}_average_{'_'.join(map(str, cumulative_timepoints))}.csv"
         filepath = os.path.join(save_dir, filename)
         
         # Save the result to a new CSV file
@@ -168,13 +170,14 @@ os.makedirs(save_dir, exist_ok=True)
 
 # Save intersections and get the final intersection for debugging
 if filtered_dfs:
-    final_intersection = save_intersections(filtered_dfs, timepoints, save_dir, actions[0])
+    final_intersection = save_intersections(filtered_dfs, timepoints, save_dir, action)
     
     # Debug the final intersection dataframe
     print("Final intersection dataframe:")
     print(final_intersection.head())
 else:
     print("No valid dataframes to process.")
+
 
 
 # %%
