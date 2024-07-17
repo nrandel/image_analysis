@@ -7,13 +7,12 @@ import os
 
 #%%
 "Actions for 1099, using 0-1000 frames with threshold 3 == frames between actions"
+"Important: behaviour.csv starts with '1', activity.csv with '0' - fixed (edited file)"
+"start of event == in output filename from dff_calculation.py"
 # Stimulus: 100-105/ 680-694 (2)
 # Forward: 51, 74 (26)
 # Turn: (14)
 # HP: (27)
-
-# %%
-"Important: behaviour.csv starts with '1', activity.csv with '0' - fixed (edited file)"
 
 #%%
 #1. Pick a certain time window and read out the peak DF/F and the average DF/F in that time window for each cell body
@@ -21,15 +20,21 @@ import os
 #3. Find all neurons whose responses are 1.5 or 2 SD higher than the overall mean
 
 "Input dff from dff_calculation.py"
-# Input: df == activity traces for each cell body in the brain, 
+# Input: df == activity traces for each cell body in the brain per event, 
 # read out from tif stack generated with sliding window for dff
 # Output: Neuron names and activity that meet the statistic requirements. Specifically for each event
 # check for existing filename before saving
 
+
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+
 def plot_neuron_activity(df, neurons, time_range, title):
     plt.figure(figsize=(12, 8))
+    time_indices = df.index[time_range[0]:time_range[1]+1]
     for neuron in neurons:
-        plt.plot(df.index[time_range[0]:time_range[1]+1], df[neuron][time_range[0]:time_range[1]+1], label=neuron)
+        plt.plot(time_indices, df.loc[time_indices, neuron], label=neuron)
     plt.title(title)
     plt.xlabel('Timepoint')
     plt.ylabel('ΔF/F')
@@ -38,128 +43,85 @@ def plot_neuron_activity(df, neurons, time_range, title):
     plt.show()
 
 def save_neurons_to_csv(neurons, filename, path=''):  
-    filepath = os.path.join(path, filename)  
-    if os.path.exists(filepath):
-        overwrite = input(f"File {filepath} already exists. Do you want to overwrite it? (y/n): ")
-        if overwrite.lower() != 'y':
-            print(f"File {filepath} not saved.")
-            return
+    filepath = os.path.join(path, filename)
     pd.DataFrame(neurons).to_csv(filepath, header=False)
-    print(f"File {filepath} saved successfully.")
 
-# Load the dataset from the CSV file
+def process_csv_files(directory, output_dir, window_length, adjustment):
+    # Iterate through each CSV file in the specified directory
+    for file in os.listdir(directory):
+        if file.endswith('.csv'):
+            print(f"Processing file: {file}")
+            
+            # Extract start time from filename (e.g., output_dff_S_100.csv -> 100)
+            start_time = int(file.split('_')[-1].split('.')[0])
+            
+            # Load the dataset
+            df = pd.read_csv(os.path.join(directory, file))
+            
+            # Drop the 'timepoint' column
+            if 'timepoint' in df.columns:
+                df.drop(columns=['timepoint'], inplace=True)
+            
+            # Compute adjusted start time
+            start_time_adjusted = start_time + adjustment
+            end_time = start_time_adjusted + window_length
+            time_range = (start_time_adjusted, end_time)
+            time_range_plot = (start_time_adjusted - 30, start_time_adjusted + 100)
+            
+            # Compute average ΔF/F in the time window for each neuron
+            time_window_data = df.iloc[time_range[0]:time_range[1]+1]
+            average_dff = time_window_data.mean()
+            
+            # Compute mean and standard deviation for average ΔF/F
+            mean_average_dff = average_dff.mean()
+            sd_average_dff = average_dff.std()
+            
+            # Define the threshold for identifying responsive neurons
+            threshold_average = mean_average_dff + 1.5 * sd_average_dff
+            
+            # Identify neurons whose responses are 1.5 SD higher than the mean
+            responsive_neurons_average = average_dff[average_dff > threshold_average]
+            
+            if not responsive_neurons_average.empty:
+                # Save neurons to CSV file with specified path
+                "change name and adjust"
+                filename = f"Turn_F0_15_adjust_9_SD_1-5_average_{start_time}_timepoint_{start_time}.csv"
+                save_neurons_to_csv(responsive_neurons_average, filename, path=output_dir)
+                
+                # Save the original CSV file with only the columns corresponding to the responsive neurons
+                df_responsive_neurons_average = df[list(responsive_neurons_average.index)]
+                df_responsive_neurons_average.to_csv(os.path.join(output_dir, filename), index=False)
+                
+                # Plot results
+                plot_neuron_activity(df, responsive_neurons_average.index, time_range_plot, f'Responsive neurons based on average ΔF/F (Start: {start_time})')
 
-# dff from dff_calculation.py
-"Select"
-df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/output_dff_F_74.csv')
+# Parameters
+"change name"
+directory = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9'
+output_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9/SD_1-5'
+window_length = 10
+adjustment = 0
 
-# Drop the 'timepoint' column and use the index as the new timepoint
-df.drop(columns=['timepoint'], inplace=True)
-
-# Select the time window for statistical analysis (SD) 
-# to define neurons that correlate with behaviour 
-
-"Adjust time window for statistic analysis SD"
-"Stimulus: Ft, action end + 5 frames"
-"Action Adjust 0: Ft, Ft + 12"
-"Action Adjust 9: Ft - 6, Ft + 6"
-time_window = list(range(74, 86))
-
-# Extract the relevant rows for the time window using the index as timepoint
-time_window_data = df.iloc[time_window]
-
-# Compute the peak ΔF/F and the average ΔF/F in the time window for each neuron
-peak_dff = time_window_data.max()
-average_dff = time_window_data.mean()
-
-# Compute the mean and standard deviation for the peak and average ΔF/F across all neurons
-mean_peak_dff = peak_dff.mean()
-mean_average_dff = average_dff.mean()
-
-sd_peak_dff = peak_dff.std()
-sd_average_dff = average_dff.std()
-
-# Define the threshold for identifying responsive neurons
-"Choose SD"
-threshold_peak = mean_peak_dff + 1.5 * sd_peak_dff
-threshold_average = mean_average_dff + 1.5 * sd_average_dff
-
-#threshold_peak = mean_peak_dff + 2 * sd_peak_dff
-#threshold_average = mean_average_dff + 2 * sd_average_dff
-
-# Identify neurons whose responses are XX SD higher than the overall mean
-responsive_neurons_peak = peak_dff[peak_dff > threshold_peak]
-responsive_neurons_average = average_dff[average_dff > threshold_average]
-
-# Find the intersection of responsive neurons
-responsive_neurons_intersection = responsive_neurons_peak.index.intersection(responsive_neurons_average.index)
-
-# Find all neurons
-all_neurons = df.columns
-
-# Find neurons that are not responsive for both peak and average ΔF/F
-non_responsive_neurons = all_neurons.difference(responsive_neurons_intersection)
-
-"""
-# Print the results
-print("Responsive neurons based on peak ΔF/F (count: {}):".format(len(responsive_neurons_peak)))  # Number of neurons
-print(responsive_neurons_peak)
-
-print("\nResponsive neurons based on average ΔF/F (count: {}):".format(len(responsive_neurons_average)))  # Number of neurons
-print(responsive_neurons_average)
-
-# Compute the difference between responsive_neurons_peak and responsive_neurons_average
-difference_neurons = responsive_neurons_peak.index.difference(responsive_neurons_average.index)
-print("\nDifference in neurons between peak and average ΔF/F (count: {}):".format(len(difference_neurons)))
-print(difference_neurons)
-
-print("\nNeurons that are responsive based on both peak and average ΔF/F (count: {}):".format(len(responsive_neurons_intersection)))  # Number of neurons
-print(responsive_neurons_intersection)
-
-print("\nNeurons that are not responsive for both peak and average ΔF/F (count: {}):".format(len(non_responsive_neurons)))  # Number of neurons
-print(non_responsive_neurons)
-"""
-
-# Define the directory where you want to save the files
-
-# Save to directory
-"change dir; Stim, F, HP, T"
-save_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F'
+# Process CSV files
+process_csv_files(directory, output_dir, window_length, adjustment)
 
 
-# Save neurons to CSV files with specified path
-"change name: Event_F0_adjust_SD_peak or avg_eventstart"
-#save_neurons_to_csv(responsive_neurons_peak, "Stimulus_F0_15_adjust_0_responsive_neurons_sd_1-5_peak_680.csv", path=save_dir)
-save_neurons_to_csv(responsive_neurons_average, "Forward_F0_15_adjust_0_responsive_neurons_sd_1-5_average_74.csv", path=save_dir)
-#save_neurons_to_csv(difference_neurons, "difference_neurons_682-699.csv", path=save_dir)
-#save_neurons_to_csv(responsive_neurons_intersection, "responsive_neurons_intersectio_682-699.csv", path=save_dir)
-#save_neurons_to_csv(non_responsive_neurons, "non_responsive_neurons_682-699.csv", path=save_dir)
 
-# Save the original CSV file with only the columns corresponding to the responsive neurons
-#df_responsive_neurons_peak = df[list(responsive_neurons_peak.index)]
-df_responsive_neurons_average = df[list(responsive_neurons_average.index)]
-#df_difference_neurons = df[list(difference_neurons)]
-#df_responsive_neurons_intersection = df[list(responsive_neurons_intersection)]
-#df_non_responsive_neurons = df[list(non_responsive_neurons)]
 
-"change name: Event_F0_adjust_SD_peak or avg_eventstart"
-#df_responsive_neurons_peak.to_csv(os.path.join(save_dir, "Stimulus_F0_15_adjust_0_activity_of_responsive_neurons_sd_1-5_peak_680.csv"), index=False)
-df_responsive_neurons_average.to_csv(os.path.join(save_dir, "Forward_F0_15_adjust_0_activity_of_responsive_neurons_sd_1-5_average_74.csv"), index=False)
-#df_difference_neurons.to_csv(os.path.join(save_dir, "activity_of_difference_neurons_682-699.csv"), index=False)
-#df_responsive_neurons_intersection.to_csv(os.path.join(save_dir, "activity_of_responsive_neurons_intersection_682-699.csv"), index=False)
-#df_non_responsive_neurons.to_csv(os.path.join(save_dir, "activity_of_non_responsive_neurons_682-699.csv"), index=False)
 
-# Define start and end times for plotting 80-150/ 660-740
-# Note: stimulus window 100-105/ 680-694
-start_time = 50
-end_time = 150
-time_range = (start_time, end_time)
 
-# Plot results
-#plot_neuron_activity(df, responsive_neurons_peak.index, time_range, 'Responsive neurons based on peak ΔF/F')
-plot_neuron_activity(df, responsive_neurons_average.index, time_range, 'Responsive neurons based on average ΔF/F')
-#plot_neuron_activity(df, responsive_neurons_intersection, time_range, 'Neurons responsive based on both peak and average ΔF/F')
-#plot_neuron_activity(df, non_responsive_neurons, time_range, 'Neurons not responsive for both peak and average ΔF/F') #For now to many datapoints to plot
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #%%
