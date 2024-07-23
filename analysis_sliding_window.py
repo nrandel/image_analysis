@@ -95,7 +95,29 @@ for index, row in time_windows_df.iterrows():
 
 
 #%%
-# Find intersection between neurons that respond to first and sec action 
+"test file formats"
+#output_dff == dff calculation specific for each action.
+# SD also ok, showing cells == header and activity == rows
+
+import pandas as pd
+
+# Replace 'your_file.csv' with the path to your CSV file
+file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0/SD_1-5/Stimulus_F0_15_adjust_0_SD_1-5_average_680_timepoint_680.csv'
+
+# Read the CSV file
+df = pd.read_csv(file_path)
+
+# Display the header (column names)
+print("Header:")
+print(df.columns)
+
+# Display the first couple of rows
+print("\nFirst couple of rows:")
+print(df.head(2))
+
+#%%
+"Not Working"
+# Find intersection between neurons that respond to two consecutive action 
 # Input: Neuron names that meet the statistic requirements for each event.
 # Output: Neuron names! that meet statistic requirements for both events.
 
@@ -105,78 +127,60 @@ import re
 import glob
 
 # Directory containing the stimulus files
-input_dir = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/T_adjust-9/'
-
-# Define the action manually
-action = 'Turn'
-
-# Use glob to list all CSV files in the directory
-file_paths = glob.glob(os.path.join(input_dir, f'{action}_long-sliding-window_activity_of_responsive_neurons_sd_1-5_average_*.csv'))
-
-# Extract timepoints from file paths
-pattern = rf'{action}_(.*?)_average_(\d+).csv'
-actions_timepoints = [(re.search(pattern, os.path.basename(fp)).groups()) for fp in file_paths]
-timepoints = sorted(map(int, [tp[1] for tp in actions_timepoints]))
-
-# Read the CSV files into a list of dataframes and debug the content
-dfs = []
-for file_path in file_paths:
-    try:
-        df = pd.read_csv(file_path)
-        dfs.append(df)
-        print(f"Contents of {file_path}:")
-        print(df.head())
-    except pd.errors.EmptyDataError:
-        print(f"Warning: {file_path} is empty or improperly formatted and will be skipped.")
-    except Exception as e:
-        print(f"Error reading {file_path}: {e}")
-
-# Extract the headers from each dataframe
-headers = [set(df.columns) for df in dfs]
-
-# Find the common headers across all dataframes
-common_headers = set.intersection(*headers)
-
-print(f"Common headers: {common_headers}")
-
-# Filter the dataframes to include only the common headers
-filtered_dfs = [df[list(common_headers)] for df in dfs]
-
-# Function to save the filtered dataframes with common headers
-def save_intersections(filtered_dfs, timepoints, save_dir, action):
-    intersection = filtered_dfs[0]
-    cumulative_timepoints = [timepoints[0]]
-    
-    for i, df in enumerate(filtered_dfs[1:], start=1):
-        intersection = pd.merge(intersection, df, how='inner', on=list(common_headers))
-        cumulative_timepoints.append(timepoints[i])
-        
-        # Generate the filename
-        filename = f"Intersection_{action}_average_{'_'.join(map(str, cumulative_timepoints))}.csv"
-        filepath = os.path.join(save_dir, filename)
-        
-        # Save the result to a new CSV file
-        intersection.to_csv(filepath, index=False)
-        print(f"Intersection saved to {filepath}")
-    
-    # Return the final intersection for debugging
-    return intersection
+input_dir = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/Stim/'
 
 # Save directory
-save_dir = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/T_adjust-9/intersection'
+save_dir = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/Stim/intersection'
 
-# Ensure the save directory exists
-os.makedirs(save_dir, exist_ok=True)
+# Define the action manually
+action = 'Stimulus'
 
-# Save intersections and get the final intersection for debugging
-if filtered_dfs:
-    final_intersection = save_intersections(filtered_dfs, timepoints, save_dir, action)
+# Use glob to list all CSV files in the directory
+file_paths = glob.glob(os.path.join(input_dir, f'{action}_*_average_*.csv'))
+
+# Check if any files are found
+if not file_paths:
+    raise FileNotFoundError(f'No files found for action "{action}". Please check the action name or the directory.')
+
+# Extract timepoints from file paths
+pattern = rf'{action}_.+_average_(\d+).csv'
+actions_timepoints = [(re.search(pattern, os.path.basename(fp)).group(1), fp) for fp in file_paths]
+timepoints = sorted([(int(tp), fp) for tp, fp in actions_timepoints])
+
+# Check if any valid files are found after pattern matching
+if not timepoints:
+    raise ValueError(f'No valid files found for action "{action}" with the specified pattern. Please check the file naming convention.')
+
+
+# Function to merge DataFrames with common columns only
+def merge_dataframes(df1, df2):
+    common_columns = set(df1.columns).intersection(df2.columns)
+    merged_df = pd.merge(df1[common_columns], df2[common_columns], on=list(common_columns), how='inner')
+    return merged_df
+
+# Read the CSV files into DataFrames
+dataframes = {tp: pd.read_csv(fp) for tp, fp in timepoints}
+
+# Initialize the merged DataFrame with the first file's data
+merged_df = dataframes[timepoints[0][0]].copy()
+
+# Merge all subsequent DataFrames iteratively
+for tp, fp in timepoints[1:]:
+    current_df = dataframes[tp]
+    merged_df = merge_dataframes(merged_df, current_df)
+
+    # Update the filename
+    merged_filename = f'{action}_timepoint_' + '_'.join(map(str, [tp for tp, _ in timepoints[:timepoints.index((tp, fp))+1]])) + '.csv'
     
-    # Debug the final intersection dataframe
-    print("Final intersection dataframe:")
-    print(final_intersection.head())
-else:
-    print("No valid dataframes to process.")
+    # Save the merged DataFrame
+    merged_df.to_csv(os.path.join(save_dir, merged_filename), index=False)
+
+print('Merging and saving completed.')
+
+
+
+
+
 
 
 
@@ -213,7 +217,7 @@ def plot_columns_in_chunks(df, chunk_size=5, x_start=None, x_end=None):
             print(f"No data plotted for columns {chunk_indices[0]} to {chunk_indices[-1]}")
 
 # Load:
-file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/T/intersection/Intersection_Stimulus_long-sliding-window_activity_of_responsive_neurons_sd_1-5_average_13_33_59_120.csv'
+file_path = '/Users/nadine/Documents/Zlatic_lab/Nicolo_LSM-single-cell-data/20240531_Nadine_Randel_fluorescence_measurements/WillBishop/output/dff_long/T/intersection/Intersection_Turn_long-sliding-window_activity_of_responsive_neurons_sd_1-5_average_13_33_59_120.csv'
 df = pd.read_csv(file_path, index_col = False)  # Assuming the first column is the index
 
 # Specify x-axis range (optional)
