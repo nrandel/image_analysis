@@ -117,8 +117,8 @@ input_csv = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/18-0
 df = pd.read_csv(input_csv, sep=';')
 
 # Set the start range and behaviors to filter (optional)
-start_range = (1, 1000)
-behaviors = ['T']  # Sspecific behaviors to filter for 'F', 'T', 'HP'
+start_range = (1, 10100)
+behaviors = ['S']  # Sspecific behaviors to filter for 'F', 'T', 'HP'
 gap_threshold = 3  # Gap threshold in the same time unit as START and END columns
 include_less_than_threshold = False  # Set to True to include behaviors with gaps less than or equal to threshold
 include_greater_than_threshold = True  # Set to True to include behaviors with gaps strictly greater than threshold
@@ -127,7 +127,7 @@ include_greater_than_threshold = True  # Set to True to include behaviors with g
 filtered_df = filter_behaviors(df, start_range, behaviors, gap_threshold, include_less_than_threshold, include_greater_than_threshold)
 
 # Save the filtered DataFrame to a new CSV file
-output_csv = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/action/Turn_threshold_3_18-02-15L1-behavior-ol_filtered_1-1000.csv'
+output_csv = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/action/Stimulus_threshold_3_18-02-15L1-behavior-ol_filtered_1-10100.csv'
 filtered_df.to_csv(output_csv, index=False)
 
 # Output the filtered DataFrame for reference
