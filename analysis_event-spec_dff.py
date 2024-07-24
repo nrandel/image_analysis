@@ -235,17 +235,97 @@ def main(data_dir, subset_file, output_dir):
 # Example usage:
 main('/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all', '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/SD_1-5/intersection/Stimulus_timepoint_100_680_1260.csv', '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/selected_neurons')
 
+
+
 #%%
 # Input csv of selected neurons. (== neuronal activity of neurons that response to multiple events)
 # Output: plot average of neurons for all events. (each event is a different csv)
 # set action start (== *_timepoint.csv) to 0, and plot +/- specific no. of frames
+import os
+import re
+import pandas as pd
+import matplotlib.pyplot as plt
 
+def load_csv_files(directory):
+    """Load all CSV files in the specified directory into a dictionary of DataFrames."""
+    dataframes = {}
+    for filename in os.listdir(directory):
+        filepath = os.path.join(directory, filename)
+        if os.path.isfile(filepath) and filename.endswith(".csv"):
+            df = pd.read_csv(filepath)
+            dataframes[filename] = df
+    return dataframes
 
+def extract_timepoints_from_filename(filename):
+    """Extract the list of timepoints from the filename using regex."""
+    match = re.search(r'_S_(\d+)', filename)
+    if match:
+        return int(match.group(1))
+    else:
+        raise ValueError(f"Timepoint not found in filename: {filename}")
 
+def add_aligned_index(df, timepoint):
+    """Add an index column aligned so that the action start is set to 0."""
+    df['index'] = df.index - timepoint
+    return df.set_index('index')
 
+def plot_individual_neurons(dataframes, frames_before, frames_after):
+    """Plot the activity of individual neurons and their averages for all events."""
+    neuron_activity = {}
 
+    for filename, df in dataframes.items():
+        try:
+            timepoint = extract_timepoints_from_filename(filename)
+        except ValueError as e:
+            print(e)
+            continue
 
+        aligned_df = add_aligned_index(df, timepoint)
+        start = -frames_before
+        end = frames_after + 1
+        selected_range_df = aligned_df.loc[start:end]
 
+        print(f"Aligned data for {filename} at timepoint {timepoint}:")
+        print(selected_range_df.head())  # Print first few rows to verify alignment
+
+        for neuron in selected_range_df.columns:
+            if neuron != 'index':
+                if neuron not in neuron_activity:
+                    neuron_activity[neuron] = []
+                neuron_activity[neuron].append(selected_range_df[neuron])
+
+    for neuron, traces in neuron_activity.items():
+        all_traces = pd.concat(traces, axis=1)
+        avg_trace = all_traces.mean(axis=1)
+
+        print(f"Collected traces for neuron {neuron}:")
+        print(all_traces.head())  # Print first few rows to verify traces collection
+
+        plt.figure(figsize=(10, 6))
+        
+        # Plot all individual traces
+        for trace in traces:
+            plt.plot(trace.index, trace.values, color='black', alpha=0.3)
+
+        # Plot the average activity
+        plt.plot(avg_trace.index, avg_trace.values, color='red', label='Average Activity')
+
+        plt.xlabel('Frame')
+        plt.ylabel('Neuronal Activity')
+        plt.title(f'Neuronal Activity for {neuron}')
+        plt.axvline(x=0, color='r', linestyle='--', label='Action Start')
+        plt.legend()
+        plt.show()
+
+def main(selected_neurons_dir, frames_before, frames_after):
+    # Load all CSV files of selected neurons
+    dataframes = load_csv_files(selected_neurons_dir)
+    
+    # Plot the activity of individual neurons
+    plot_individual_neurons(dataframes, frames_before, frames_after)
+
+# Example usage:
+main('/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/selected_neurons', frames_before=30, frames_after=30)
 
 
 
@@ -434,17 +514,17 @@ def plot_columns_in_chunks(df, chunk_size=5, x_start=None, x_end=None):
 
 # Load:
 #Beh 1
-#file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/SD_1-5/Stimulus_F0_15_adjust_9_SD_1-5_average_1260_timepoint_1260.csv'
+#file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/SD_1-5/Stimulus_F0_15_adjust_9_SD_1-5_average_100_timepoint_100.csv'
 
 #Beh 2
-file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/selected_neurons/selected_neurons_intersection_Stimulus_timepoint_100_680_1260_output_dff_S_100.csv'
+file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/selected_neurons/selected_neurons_intersection_Stimulus_timepoint_100_680_1260_output_dff_S_1260.csv'
 
 
 df = pd.read_csv(file_path, index_col = False)  # Assuming the first column is the index
 
 # Specify x-axis range (optional)
-x_start = 1820  # Replace with your desired start index 80, 640
-x_end = 1860   # Replace with your desired end index 140, 740
+x_start = 1220  # Replace with your desired start index 80, 640
+x_end = 1300   # Replace with your desired end index 140, 740
 
 # Print some debug information
 print(f"DataFrame head:\n{df.head()}\n")
