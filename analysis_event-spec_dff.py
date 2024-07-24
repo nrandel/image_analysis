@@ -235,8 +235,10 @@ def main(data_dir, subset_file, output_dir):
 # Example usage:
 main('/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all', '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/SD_1-5/intersection/Stimulus_timepoint_100_680_1260.csv', '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/selected_neurons')
 
-
-
+#%%
+# Input csv of selected neurons. (== neuronal activity of neurons that response to multiple events)
+# Output: plot average of neurons for all events. (each event is a different csv)
+# set action start (== *_timepoint.csv) to 0, and plot +/- specific no. of frames
 
 
 
@@ -432,10 +434,10 @@ def plot_columns_in_chunks(df, chunk_size=5, x_start=None, x_end=None):
 
 # Load:
 #Beh 1
-file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/SD_1-5/Stimulus_F0_15_adjust_9_SD_1-5_average_1260_timepoint_1260.csv'
+#file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/SD_1-5/Stimulus_F0_15_adjust_9_SD_1-5_average_1260_timepoint_1260.csv'
 
 #Beh 2
-#file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F/Intersection_Forward_F0_15_adjust_9_neuronal_activity_responsive_neurons_sd_1-5_average_51_AND_74_For_Action_2.csv'
+file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/selected_neurons/selected_neurons_intersection_Stimulus_timepoint_100_680_1260_output_dff_S_100.csv'
 
 
 df = pd.read_csv(file_path, index_col = False)  # Assuming the first column is the index
