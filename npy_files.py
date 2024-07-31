@@ -20,113 +20,130 @@ npz_path = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/neuron_trac
 inspect_npz(npz_path)
 
 # %%
+
+#%%
+import os
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import os
+import skimage.io
+from tqdm import tqdm
+# from skimage.measure import regionprops # to get cell centroids
+import matplotlib.pylab as plt
 
-def calculate_dff(npz_path, F0_window, F0_start, Ft_start, problematic_neurons_path):
-    # Load the NPZ file
-    data = np.load(npz_path)
+#%%
+# Load data
+base_path = "/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered"
+acardona_fluorescence = pd.read_csv(f"{base_path}/measurements_klb.csv")
+behaviour_annotations = pd.read_csv(f"{base_path}/18-02-15L1-behavior-ol.csv")
+
+# Get metadata
+timepoints = np.arange(len(acardona_fluorescence))
+neuron_names = acardona_fluorescence.columns[1:]
+neuron_locations = np.array([[float(s) for s in l.split('"')[1].split("::")] for l in neuron_names])
+
+# Get fluorescence data
+acardona_fluorescence_data = acardona_fluorescence.iloc[:,1:].to_numpy().T
+n_neurons, n_timepoints = acardona_fluorescence_data.shape
+
+# Load new neuron traces data
+#neuron_traces_raw = np.load(f"{base_path}/neuron_traces_raw.npz")["neuron_traces"]
+neuron_traces_cleaned = np.load(f"{base_path}/neuron_traces_cleaned.npz")["neuron_traces"]
+
+# # New neuron locations
+# neuron_segmentation = skimage.io.imread(f"{base_path}/lsm_cell_segmentation.tif")
+# cells = regionprops(neuron_segmentation)
+# cell_centroids = np.array([c.centroid for c in cells])
+# np.savetxt(f"{base_path}/neuron_centroids.txt", cell_centroids, delimiter=",")
+cell_centroids = np.loadtxt(f"{base_path}/neuron_centroids.txt", delimiter=",")
+
+#%%
+# ---------------------------------------------------
+# Get times and durations of labelled events
+# ---------------------------------------------------
+
+# Parse behaviour annotations
+behaviourData = behaviour_annotations.to_numpy()
+eventNames = ["forward", "backward", "stim", "hunch", "other", "left_turn", "right_turn", "HP"]
+adjust_start = 9
+
+# Get behaviour times
+eventTimes = {e: [] for e in eventNames}
+for b in behaviourData:
+    start, end, forward, backward, stim, hunch, other, turn, left_turn, right_turn, HP = [int(c) if len(c)>0 else 0 for c in b[0].split(";")]
+    cur_events = [forward, backward, stim, hunch, other, left_turn, right_turn, HP]
+    assert np.sum(cur_events) == 1, "Multiple events in one timepoint"
+    event_name = eventNames[cur_events.index(1)]
+    eventTimes[event_name].append([start, end])
+
+# Remove events after N timepoints
+maxiumumTimepoint = 1300
+for eventName in eventTimes:
+    eventTimes[eventName] = [e for e in eventTimes[eventName] if e[1] < maxiumumTimepoint]
+
+# Subtract the adjustmnet time from the start times
+for eventName in eventTimes:
+    # Get the current events (for the current event name)
+    cur_events = eventTimes[eventName]
+    # Iterate over the event times and subtract adjust_start from every start value
+    adjusted_events = [] # empty list in which to put the adjusted times
+    for e in cur_events:
+        start, end = e
+        adjusted_start = start - adjust_start
+        adjusted_events.append([adjusted_start, end])
+    # Set the adjusted times
+    eventTimes[eventName] = adjusted_events
     
-    # Extract neuronal activity data
-    neuronal_activity = data['neuron_traces']
-    
-    # Create time points array
-    time_points = np.arange(neuronal_activity.shape[0])
-    
-    # Calculate ΔF/F
-    dff = pd.DataFrame()
-    dff['timepoint'] = time_points
-    
-    problematic_neurons = []
 
-    for neuron_idx in range(neuronal_activity.shape[1]):
-        neuron = f'neuron_{neuron_idx}'
+#%%
+# ---------------------------------------------------
+# Get time-locked activity for each event type
+# ---------------------------------------------------
 
-        # Ensure the F0 window is within the valid range
-        if F0_start + F0_window > Ft_start:
-            raise ValueError("Specified F0 window overlaps with Ft start period.")
-        
-        # Extract the F0 window for each neuron, ignoring NaNs
-        F0 = np.nanmean(neuronal_activity[F0_start:F0_start+F0_window, neuron_idx])
-        
-        # Check if F0 is zero to avoid division by zero
-        if F0 == 0:
-            problematic_neurons.append(neuron)
-            continue
-        
-        # Calculate ΔF/F for each time point
-        dff[neuron] = [(ft - F0) / F0 for ft in neuronal_activity[:, neuron_idx]]
-    
-    # Save the list of problematic neurons
-    if problematic_neurons:
-        pd.Series(problematic_neurons).to_csv(problematic_neurons_path, index=False, header=['problematic_neurons'])
+# Define neurons of interest
+neuronTracesOfInterest = neuron_traces_cleaned
+n_neurons, n_timepoints = neuronTracesOfInterest.shape
 
-    return dff
+# Set windows
+preWindow = 15 # average for F0
+after_event_Window = 15 # frames after event stop that are considered
 
-def plot_dff(dff, output_plot_path):
-    # Plot the ΔF/F values for each neuron
-    plt.figure(figsize=(15, 8))
-    for neuron in dff.columns[1:]:  # Skip the 'timepoint' column
-        plt.plot(dff['timepoint'], dff[neuron], label=neuron)
-    
-    plt.xlabel('Timepoint')
-    plt.ylabel('ΔF/F')
-    plt.title('ΔF/F Over Time for Neurons')
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize='small')
-    plt.tight_layout()
-    plt.savefig(output_plot_path)
-    plt.show()
+# Get behaviour evoked data
+allEventEvokedActivity = dict() # {} # make a new dictionary to keep all of the evoked data for each event type
+for event in eventNames:
+    # Get evoked data
+    cur_events = eventTimes[event]
+    eventDurations = np.array([np.ptp(e) for e in cur_events])
+    postWindow = np.max(eventDurations) + after_event_Window
+    # Get only those events that start after preWindow, and end before n_timepoint - postWindow
+    cur_events = [e for e in cur_events if e[0] > preWindow and e[1] < n_timepoints-postWindow]
+    # Calculate F - F0 for each instance of event 
+    evokedData = np.zeros([len(cur_events), n_neurons, preWindow+postWindow])
+    for i,e in enumerate(tqdm(cur_events)):
+        start, end = e
+        cur_evoked = neuronTracesOfInterest[:,start-preWindow:start+postWindow].copy()
+        baseline_F0 = cur_evoked[:,:preWindow].mean(axis=1)[:,None] # make baseline habe shape of (n_neurons, 1)
+        # # Calculate F - F0
+        cur_evoked_baseline_subtracted = cur_evoked - baseline_F0
+        # # Calculate delta F over F0
+        # cur_evoked_deltaFOverF = (cur_evoked - baseline_F0) / baseline_F0
+        evokedData[i] = cur_evoked_baseline_subtracted
+    # Add the evoked data to the allEventEvokedActivity store
+    allEventEvokedActivity[event] = evokedData
 
-
-# Paths
-npz_path = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/neuron_traces_cleaned.npz' 
-# for behaviour first 1000TP, except stim (all)
-behaviour_csv_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/action/Forward_threshold_3_18-02-15L1-behavior-ol_filtered_1-10100.csv'  
-# output file name: F0 average over 15 frames, 
-# adjust == F0 window calculated 9 frames before start of behaviour (Ft)
-output_dir = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/analysis/dff_F0_15_adjust-9/Forward'  
-
-# Parameters
-F0_window = 15  # Number of points to average for F0
-adjustment = 9  # Value to adjust F0 starting time. Use 0 for no adjustment.
-
-# Load behaviour data
-behaviour_data = pd.read_csv(behaviour_csv_path)
-
-# Iterate through behaviour data
-for index, row in behaviour_data.iterrows():
-    start_time = int(row['start'])
-    end_time = int(row['end'])
-    behaviour = row['beh']
-    
-    # Calculate F0_start based on behaviour start time and adjustment
-    F0_start = start_time - F0_window - adjustment
-    
-    # Ensure F0_start is not negative
-    if F0_start < 0:
-        print(f"Skipping row with start time {start_time} because F0_start is negative.")
-        continue
-    
-    # Set Ft_start based on behaviour start time
-    Ft_start = start_time
-
-    # Calculate ΔF/F
-    problematic_neurons_path = os.path.join(output_dir, f'problematic_neurons_{behaviour}_{start_time}.csv')
-    dff = calculate_dff(npz_path, F0_window, F0_start, Ft_start, problematic_neurons_path)
-    
-    # Save output ΔF/F data
-    output_dff_path = os.path.join(output_dir, f'output_dff_{behaviour}_{start_time}.csv')
-    dff.to_csv(output_dff_path, index=False)
-
-    # Optionally plot the results (too many neurons, here)
-    # output_plot_path = os.path.join(output_dir, f'dff_plot_{behaviour}_{start_time}.png')
-    # plot_dff(dff, output_plot_path)
-
-    # Print some debug information
-    print(f"Processed row with start time {start_time} and behaviour {behaviour}.")
-    print(f"DataFrame head:\n{dff.head()}\n")
-    print(f"Columns in DataFrame:\n{dff.columns}\n")
-
+# Generate plots of top N responding neurons
+N_responding = 200
+for event in eventNames:
+    # Get current evoked data
+    evokedData = allEventEvokedActivity[event]
+    # Get mean evoked over all event examples
+    meanEvoked = evokedData.mean(axis=0)
+    # Order neurons by mean evoked response
+    neuronOrder = np.abs(meanEvoked).mean(axis=1).argsort()[::-1]
+    # Plot top N responding neurons
+    plt.close()
+    fig,ax = plt.subplots(2,1)
+    ax[0].plot(meanEvoked[neuronOrder[:N_responding],:].T)
+    ax[1].imshow(meanEvoked[neuronOrder[:N_responding],:], aspect="auto", interpolation="nearest")
+    plt.savefig(f"./figures/{event}.png")
+    # plt.show()
 # %%
