@@ -85,7 +85,7 @@ def process_csv_files(directory, output_dir, window_length, adjustment):
             if not responsive_neurons_average.empty:
                 # Save neurons to CSV file with specified path
                 "change name and adjust"
-                filename = f"Stimulus_F0_15_adjust_9_SD_1-5_average_{start_time}_timepoint_{start_time}.csv"
+                filename = f"Turn_F0_15_adjust_9_SD_1-5_average_{start_time}_timepoint_{start_time}.csv"
                 save_neurons_to_csv(responsive_neurons_average, filename, path=output_dir)
                 
                 # Save the original CSV file with only the columns corresponding to the responsive neurons
@@ -97,10 +97,10 @@ def process_csv_files(directory, output_dir, window_length, adjustment):
 
 # Parameters
 "change name"
-directory = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all'
-output_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/SD_1-5'
+directory = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9'
+output_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9/SD_1-5'
 window_length = 10
-adjustment = 0
+adjustment = -9
 
 # Process CSV files
 process_csv_files(directory, output_dir, window_length, adjustment)
@@ -120,14 +120,14 @@ import re
 import glob
  
 # Directory containing the stimulus files
-input_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/SD_1-5/'
+input_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9/SD_1-5/'
 
 # Save directory
-save_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/SD_1-5/intersection'
+save_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9/SD_1-5/intersection'
 os.makedirs(save_dir, exist_ok=True)
 
 # Define the action manually
-action = 'Stimulus'
+action = 'Turn'
 
 # Use glob to list all CSV files in the directory
 file_paths = glob.glob(os.path.join(input_dir, f'{action}_*_timepoint_*.csv'))
@@ -233,7 +233,7 @@ def main(data_dir, subset_file, output_dir):
             save_extracted_data(extracted_data, filename, subset_file, output_dir)
 
 # Example usage:
-main('/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all', '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/SD_1-5/intersection/Stimulus_timepoint_100_680_1260.csv', '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/selected_neurons')
+main('/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9', '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9/SD_1-5/intersection/Turn_timepoint_33_59.csv', '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9/selected_neurons')
 
 
 
@@ -258,7 +258,9 @@ def load_csv_files(directory):
 
 def extract_timepoints_from_filename(filename):
     """Extract the list of timepoints from the filename using regex."""
-    match = re.search(r'_S_(\d+)', filename)
+    #match = re.search(r'_S_(\d+)', filename)
+    #match = re.search(r'_F_(\d+)', filename)
+    match = re.search(r'_T_(\d+)', filename)
     if match:
         return int(match.group(1))
     else:
@@ -308,7 +310,7 @@ def plot_individual_neurons(dataframes, frames_before, frames_after):
             plt.plot(trace.index, trace.values, color='black', alpha=0.3)
 
         # Plot the average activity
-        plt.plot(avg_trace.index, avg_trace.values, color='red', label='Average Activity')
+        plt.plot(avg_trace.index, avg_trace.values, color='magenta', label='Average Activity')
 
         plt.xlabel('Frame')
         plt.ylabel('Neuronal Activity')
@@ -325,7 +327,7 @@ def main(selected_neurons_dir, frames_before, frames_after):
     plot_individual_neurons(dataframes, frames_before, frames_after)
 
 # Example usage:
-main('/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_0/Stim_F0_15_adjust_0_all/selected_neurons', frames_before=30, frames_after=30)
+main('/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9/selected_neurons', frames_before=30, frames_after=30)
 
 
 
@@ -348,130 +350,6 @@ main('/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_a
 
 
 #%%
-
-"keep this block!!!"
-# Find intersection between neurons that respond to 2 action-events 
-# Input: Neuron names that meet the statistic requirements for each event.
-# Output: Neuron names! that meet statistic requirements for both events.
-
-# List of file paths
-file_paths = [
-    '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F/forward_F0_15_adjust_9_responsive_neurons_sd_1-5_average_51.csv',
-    '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F/forward_F0_15_adjust_9_responsive_neurons_sd_1-5_average_74.csv',
-    # Add more file paths as needed
-]
-
-# Read the CSV files into a list of dataframes
-dfs = [pd.read_csv(file_path, header=None) for file_path in file_paths]
-
-# Extract the first column from each dataframe
-first_columns = [df[[0]] for df in dfs]
-
-# Find the intersection of the first columns
-intersection = first_columns[0]
-for col in first_columns[1:]:
-    intersection = pd.merge(intersection, col, how='inner')
-
-# Add a header to the intersection dataframe
-intersection.columns = ['cell coordinates']
-
-# Save the result to a new CSV file
-"change name"
-output_file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F/Intersection_Forward_F0_15_adjust_9_responsive_neurons_sd_1-5_average_51_AND_74.csv'
-intersection.to_csv(output_file_path, index=False)
-
-print("Intersection saved to", output_file_path)
-
-
-#%%
-"very restricted - needs to be more generic to handle multiple events" #TODO
-# Get neuron activity that meet statistic for actions fron the intersectionn of responsive neurons
-
-# Input 1: inntersection_df == Neuron names! that meet statistic requirements for both events.
-# Input 2: df == activity traces for each cell body in the brain, 
-# read out from tif stack generated with sliding window for dff. 
-# Important: because the dff is calculated separately for each action, 
-# the loaded activity files must be correspond to each action
-# Output: Neuron traces that meet statistic requirements for both events (csv and plot)
-
-def plot_neuron_activity(df, neurons, time_range, title, show_legend=True):
-    plt.figure(figsize=(12, 8))
-    for neuron in neurons:
-        plt.plot(df.index[time_range[0]:time_range[1]+1], df[neuron][time_range[0]:time_range[1]+1], label=neuron)
-    plt.title(title)
-    plt.xlabel('Timepoint')
-    plt.ylabel('ΔF/F')
-    if show_legend:
-        plt.legend(loc='upper right', fontsize='small')
-    plt.grid(True)
-    plt.show()
-
-def save_neurons_to_csv(neurons, filename, path=''):
-    filepath = os.path.join(path, filename)
-    pd.DataFrame(neurons).to_csv(filepath, header=False)
-
-# Load the activity for each action (csv)
-"change name"
-"needs to be run separately for action 1 and action 2"
-# Neuronal activity for action 1
-#df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F/Forward_F0_15_adjust_9_activity_of_responsive_neurons_sd_1-5_average_51.csv')
-
-# Neuronal activity for action 2
-df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F/Forward_F0_15_adjust_9_activity_of_responsive_neurons_sd_1-5_average_74.csv')
-
-
-# Clean column names to remove leading/trailing spaces and quotes
-df.columns = df.columns.str.strip().str.replace('"', '')
-
-# Load the second CSV file to find the intersection
-"change name"
-intersection_df = pd.read_csv('/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F/Intersection_Forward_F0_15_adjust_9_responsive_neurons_sd_1-5_average_51_AND_74.csv')
-
-# Assuming that 'intersection_df' contains the responsive neuron identifiers in the first column
-responsive_neurons_new_csv = intersection_df.iloc[:, 0].values
-
-# Identify the neurons present in both the dataset and the responsive neurons list
-matching_neurons = [neuron for neuron in responsive_neurons_new_csv if neuron in df.columns]
-
-# Log neurons that were not found
-non_matching_neurons = [neuron for neuron in responsive_neurons_new_csv if neuron not in df.columns]
-if non_matching_neurons:
-    print(f"Neurons not found in the dataset: {non_matching_neurons}")
-
-# Save the original CSV file with only the columns corresponding to the responsive neurons
-df_responsive_neurons = df[matching_neurons]
-
-"change name"
-"needs to be run separately for action 1 and action 2"
-# Action 1
-#output_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F/Intersection_Forward_F0_15_adjust_9_neuronal_activity_responsive_neurons_sd_1-5_average_51_AND_74_For_Action_1.csv'
-
-# Action 2
-output_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/filtered_dff/F/Intersection_Forward_F0_15_adjust_9_neuronal_activity_responsive_neurons_sd_1-5_average_51_AND_74_For_Action_2.csv'
-
-
-df_responsive_neurons.to_csv(output_path, index=False)
-
-print(f"Filtered DataFrame with final responsive neurons saved to {output_path}")
-
-# Define start and end times for plotting 80-150/ 660-740
-start_time = 660
-end_time = 740  # adjust
-time_range = (start_time, end_time)
-
-# Plot results without legend
-plot_neuron_activity(df, matching_neurons, time_range, 'Responsive neurons from new CSV', show_legend=False)
-
-
-
-
-
-
-
-
-
-
-
 
 
 # %%

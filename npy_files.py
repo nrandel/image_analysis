@@ -83,7 +83,7 @@ def plot_dff(dff, output_plot_path):
 # Paths
 npz_path = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/neuron_traces_cleaned.npz' 
 # for behaviour first 1000TP, except stim (all)
-behaviour_csv_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/action/Forward_threshold_3_18-02-15L1-behavior-ol_filtered_1-1000.csv'  
+behaviour_csv_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/action/Forward_threshold_3_18-02-15L1-behavior-ol_filtered_1-10100.csv'  
 # output file name: F0 average over 15 frames, 
 # adjust == F0 window calculated 9 frames before start of behaviour (Ft)
 output_dir = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/analysis/dff_F0_15_adjust-9/Forward'  
