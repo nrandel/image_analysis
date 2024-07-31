@@ -11,7 +11,7 @@ import os
 "start of event == in output filename from dff_calculation.py"
 # Stimulus: 100-105/ 680-694 (2)
 # Forward: 51, 74 (26)
-# Turn: (14)
+# Turn: (14)/ LeftTurn/ RightTurn
 # HP: (27)
 
 #%%
@@ -19,7 +19,8 @@ import os
 #2. Compute the mean peak and the mean average across all cell bodies, and the SD.
 #3. Find all neurons whose responses are 1.5 or 2 SD higher than the overall mean
 
-"Input dff from dff_calculation.py"
+"Input dff from dff_calculation.py" #or
+"Input npy_files"
 # Input: df == activity traces for each cell body in the brain per event, 
 # read out from tif stack generated with sliding window for dff
 # Output: Neuron names and activity that meet the statistic requirements. Specifically for each event
@@ -85,7 +86,7 @@ def process_csv_files(directory, output_dir, window_length, adjustment):
             if not responsive_neurons_average.empty:
                 # Save neurons to CSV file with specified path
                 "change name and adjust"
-                filename = f"Turn_F0_15_adjust_9_SD_1-5_average_{start_time}_timepoint_{start_time}.csv"
+                filename = f"Forward_F0_15_adjust_9_SD_1-5_average_{start_time}_timepoint_{start_time}.csv"
                 save_neurons_to_csv(responsive_neurons_average, filename, path=output_dir)
                 
                 # Save the original CSV file with only the columns corresponding to the responsive neurons
@@ -97,9 +98,9 @@ def process_csv_files(directory, output_dir, window_length, adjustment):
 
 # Parameters
 "change name"
-directory = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9'
-output_dir = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9/SD_1-5'
-window_length = 10
+directory = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/analysis/dff_F0_15_adjust-9/Forward'
+output_dir = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/analysis/SD_1-5/Forward'
+window_length = 12
 adjustment = -9
 
 # Process CSV files
