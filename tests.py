@@ -1,5 +1,58 @@
-# Identify cut-off time for activity traces
-# The sample did not respond in the end of the experiment and cells stop having a change in signal towards the end
+#%%
+import numpy as np
+import csv
+
+# Check NPZ file (input neuronal activity)
+def inspect_npz(npz_path):
+    # Load the NPZ file
+    data = np.load(npz_path)
+    
+    # Print the keys and some information about each key's associated data
+    print(f"Keys in the NPZ file: {data.files}")
+    for key in data.files:
+        print(f"\nKey: {key}")
+        print(f"Shape: {data[key].shape}")
+        print(f"Data Type: {data[key].dtype}")
+        print(f"First few elements: {data[key].flat[:10]}")  # Print first few elements if array is large
+
+# Path to the NPZ file
+npz_path = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/neuron_traces_cleaned.npz'
+
+# Inspect the NPZ file
+inspect_npz(npz_path)
+
+#%%
+# Load the npy file
+evoked_data = np.load('/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/TP_0_1100/forward_evoked_data_adjust_start_9.npy')
+# Print the shape
+print(f"Shape of evoked_data: {evoked_data.shape}")
+
+
+#%%
+#convert txt to csv
+import csv
+
+# Define the path to your input text file and output CSV file
+input_file_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/neuron_centroids.txt'
+output_file_path = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/neuron_centroids.csv'
+
+# Read the text file and convert the values to floating point numbers
+converted_data = []
+with open(input_file_path, 'r') as infile:
+    for line in infile:
+        # Split the line by commas and convert each value to float
+        converted_line = [float(value) for value in line.split(',')]
+        converted_data.append(converted_line)
+
+# Write the converted data to a CSV file
+with open(output_file_path, 'w', newline='') as csvfile:
+    csvwriter = csv.writer(csvfile)
+    csvwriter.writerows(converted_data)
+
+print("Data has been successfully converted and saved to 'converted_data.csv'")
+
+
+
 
 # %%
 import numpy as np
