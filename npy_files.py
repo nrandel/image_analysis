@@ -1,27 +1,4 @@
 #%%
-import numpy as np
-
-def inspect_npz(npz_path):
-    # Load the NPZ file
-    data = np.load(npz_path)
-    
-    # Print the keys and some information about each key's associated data
-    print(f"Keys in the NPZ file: {data.files}")
-    for key in data.files:
-        print(f"\nKey: {key}")
-        print(f"Shape: {data[key].shape}")
-        print(f"Data Type: {data[key].dtype}")
-        print(f"First few elements: {data[key].flat[:10]}")  # Print first few elements if array is large
-
-# Path to the NPZ file
-npz_path = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/neuron_traces_cleaned.npz'
-
-# Inspect the NPZ file
-inspect_npz(npz_path)
-
-# %%
-
-#%%
 import os
 import pandas as pd
 import numpy as np
@@ -30,6 +7,19 @@ from tqdm import tqdm
 # from skimage.measure import regionprops # to get cell centroids
 import matplotlib.pylab as plt
 
+# Key: neuron_traces
+#Shape: (6245, 10367) 
+#(Neurons, TP)
+
+# allEventEvokedActivity[event] = evokedData
+# Shape: e.g., (30, 6245, 42)
+#(First Dimension): Number of instances of the event.
+#(Second Dimension): Number of neurons.
+#(Third Dimension): Number of time points sampled around the event (pre-event + event duration + post-event).
+
+# cell_centroids.txt
+
+
 #%%
 # Load data
 base_path = "/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered"
@@ -37,7 +27,7 @@ acardona_fluorescence = pd.read_csv(f"{base_path}/measurements_klb.csv")
 behaviour_annotations = pd.read_csv(f"{base_path}/18-02-15L1-behavior-ol.csv")
 
 # Get metadata
-timepoints = np.arange(len(acardona_fluorescence))
+timepoints = np.arange(len(acardona_fluorescence)) # this is a weird way to approach this
 neuron_names = acardona_fluorescence.columns[1:]
 neuron_locations = np.array([[float(s) for s in l.split('"')[1].split("::")] for l in neuron_names])
 
@@ -64,7 +54,7 @@ cell_centroids = np.loadtxt(f"{base_path}/neuron_centroids.txt", delimiter=",")
 # Parse behaviour annotations
 behaviourData = behaviour_annotations.to_numpy()
 eventNames = ["forward", "backward", "stim", "hunch", "other", "left_turn", "right_turn", "HP"]
-adjust_start = 9
+adjust_start = 0 #'9' if nine frames prior event start; '0' no adjustment
 
 # Get behaviour times
 eventTimes = {e: [] for e in eventNames}
@@ -76,7 +66,7 @@ for b in behaviourData:
     eventTimes[event_name].append([start, end])
 
 # Remove events after N timepoints
-maxiumumTimepoint = 1300
+maxiumumTimepoint = 1100
 for eventName in eventTimes:
     eventTimes[eventName] = [e for e in eventTimes[eventName] if e[1] < maxiumumTimepoint]
 
@@ -105,7 +95,7 @@ n_neurons, n_timepoints = neuronTracesOfInterest.shape
 
 # Set windows
 preWindow = 15 # average for F0
-after_event_Window = 15 # frames after event stop that are considered
+after_event_Window = 3 # frames after event STOP that are considered
 
 # Get behaviour evoked data
 allEventEvokedActivity = dict() # {} # make a new dictionary to keep all of the evoked data for each event type
@@ -130,7 +120,16 @@ for event in eventNames:
     # Add the evoked data to the allEventEvokedActivity store
     allEventEvokedActivity[event] = evokedData
 
-# Generate plots of top N responding neurons
+    # Save the evoked data for the current event
+    # Update adjust_start in file name
+    # Update maxiumumTimepoint in directory
+    #save_dir = '/Users/nadine/Documents/Zlatic_lab/1099-nuc-seg/TP_0_1100'
+    #save_path = os.path.join(save_dir, f"{event}_evoked_data_adjust_start_9.npy")
+    #np.save(save_path, evokedData)
+
+
+#%%
+# Generate plots of top N responding neurons averaged over all events per neuron
 N_responding = 200
 for event in eventNames:
     # Get current evoked data
@@ -144,6 +143,65 @@ for event in eventNames:
     fig,ax = plt.subplots(2,1)
     ax[0].plot(meanEvoked[neuronOrder[:N_responding],:].T)
     ax[1].imshow(meanEvoked[neuronOrder[:N_responding],:], aspect="auto", interpolation="nearest")
-    plt.savefig(f"./figures/{event}.png")
-    # plt.show()
+    #plt.savefig(f"./figures/{event}.png") 
+    #plt.savefig(f"/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/figures/{event}.png")
+    plt.show()
+# %%
+#TEST
+#%%
+# ---------------------------------------------------
+# Create a Dictionary of Neuron Centroids 
+# ---------------------------------------------------
+
+# Load centroids
+cell_centroids = np.loadtxt(f"{base_path}/neuron_centroids.txt", delimiter=",")
+
+# Create a mapping of neuron identifiers to their centroid coordinates
+neuron_centroid_mapping = {f'neuron {i+1}': cell_centroids[i] for i in range(len(cell_centroids))}
+
+#%%
+
+#--------------------------------------------------
+# Keep Track of Neurons in allEventEvokedActivity
+#---------------------------------------------------
+
+allEventEvokedActivity = dict() 
+
+for event in eventNames:
+    # Get evoked data (as in the original code)
+    ...
+    evokedData = np.zeros([len(cur_events), n_neurons, preWindow+postWindow])
+
+    for i,e in enumerate(tqdm(cur_events)):
+        ...
+        evokedData[i] = cur_evoked_baseline_subtracted
+
+    # Store the evoked data along with neuron identifiers
+    neuron_ids = [f'neuron {j+1}' for j in range(n_neurons)]
+    allEventEvokedActivity[event] = {
+        'evoked_data': evokedData,
+        'neuron_ids': neuron_ids
+    }
+
+
+# %%
+
+#--------------------------------------------------
+# Access Neuron Data Later
+#--------------------------------------------------
+
+#TODO (ok but statistic eeds to be included)
+
+# Example: Access the data for the first event
+event_data = allEventEvokedActivity['forward']  # example for the 'forward' event
+evoked_data = event_data['evoked_data']
+neuron_ids = event_data['neuron_ids']
+
+# Let's say you want to analyze 'neuron 10' and 'neuron 50'
+neuron_indices = [neuron_ids.index('neuron 10'), neuron_ids.index('neuron 50')]
+
+# Access the evoked data for these neurons
+subset_evoked_data = evoked_data[:, neuron_indices, :]
+
+
 # %%
