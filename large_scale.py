@@ -1,9 +1,51 @@
 #%%
 #TEST
+import csv
+
+# Define the path to your input text file and output CSV file
+input_file_path = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/neuron_centroids.txt'
+output_file_path = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/neuron_centroids.csv'
+
+# Read the text file and convert the values to floating point numbers
+converted_data = []
+with open(input_file_path, 'r') as infile:
+    for line in infile:
+        # Split the line by commas and convert each value to float
+        converted_line = [float(value) for value in line.split(',')]
+        converted_data.append(converted_line)
+
+# Write the converted data to a CSV file
+with open(output_file_path, 'w', newline='') as csvfile:
+    csvwriter = csv.writer(csvfile)
+    csvwriter.writerows(converted_data)
+
+print("Data has been successfully converted and saved to 'converted_data.csv'")
 
 
 
 
+#%%
+import numpy as np
+
+def inspect_npz(npz_path):
+    # Load the NPZ file
+    data = np.load(npz_path)
+    
+    # Print the keys and some information about each key's associated data
+    print(f"Keys in the NPZ file: {data.files}")
+    for key in data.files:
+        print(f"\nKey: {key}")
+        print(f"Shape: {data[key].shape}")
+        print(f"Data Type: {data[key].dtype}")
+        print(f"First few elements: {data[key].flat[:10]}")  # Print first few elements if array is large
+
+# Path to the NPZ file
+npz_path = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/neuron_traces_cleaned.npz'
+
+# Inspect the NPZ file
+inspect_npz(npz_path)
+
+# %%
 
 
 
@@ -58,19 +100,20 @@ def plot_column(file_path, column_name, start_row_index, end_row_index):
     plt.show()
 
 # Usage example
-file_path = '/Users/nadine/Documents/paper/single-larva/behavior_extraction/dff_F0_15_adjust_9/Turn_F0_15_adjust_9/output_dff_T_120.csv'
+file_path = '/Users/nadine/Documents/Zlatic_lab/1099_spatial-filtered/analysis/dff_F0_15_adjust-9/Forward/output_dff_F_51.csv'
 #column_name = '110.441156::371.654771::58.375592'
-column_name = '326.009847::473.670480::57.439819'
+#column_name = '326.009847::473.670480::57.439819'
 #column_name = '112.976473::410.183829::62.392316'
-row_index = 681  # 0-based index (681 corresponds to the 682nd row in the CSV)
+column_name = 'neuron_4620'
+#row_index = 681  # 0-based index (681 corresponds to the 682nd row in the CSV)
 
 # Get specific value
-value = get_value(file_path, column_name, row_index)
-print(f"Value in column '{column_name}' at row {row_index}:", value)
+#value = get_value(file_path, column_name, row_index)
+#print(f"Value in column '{column_name}' at row {row_index}:", value)
 
 # Plot the column data from row 80 to row 140
-start_row_index = 100
-end_row_index = 150
+start_row_index = 40
+end_row_index = 100
 plot_column(file_path, column_name, start_row_index, end_row_index)
 
 
